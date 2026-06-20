@@ -81,8 +81,6 @@ function injectSidebar(portalName) {
 
     <div id="cg-actions">
       <button class="cg-action-btn" data-intent="appointments">📅 Appointments</button>
-      <button class="cg-action-btn" data-intent="results">🧪 Test Results</button>
-      <button class="cg-action-btn" data-intent="medications">💊 Medications</button>
       <button class="cg-action-btn" data-intent="messages">✉️ Messages</button>
     </div>
 
