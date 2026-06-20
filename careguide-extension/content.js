@@ -421,4 +421,6 @@ function getSelectedLanguageLabel() {
   return select?.options[select.selectedIndex]?.text || "English";
 }
 
-// ── Init ─────────────────────────────────────────────────────────────────────console.log("CareGuide content script loaded on:", window.location.href);injectSidebar(detectPortal());
+// ── Init ─────────────────────────────────────────────────────────────────────
+console.log("CareGuide content script loaded on:", window.location.href);
+injectSidebar(detectPortal());
