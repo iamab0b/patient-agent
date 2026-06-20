@@ -1,2 +1,2 @@
 # patient-agent
-Building agentic overlay for patient portals
+Building an agentic overlay for patient portals
