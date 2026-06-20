@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "CareGuide",
+  "version": "1.0.0",
+  "description": "AI-powered navigator for patient portals — plain language, voice-first, for everyone.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "tts"
+  ],
+  "host_permissions": [
+    "*://*.mychart.org/*",
+    "*://*.mychart.com/*",
+    "*://*.followmyhealth.com/*",
+    "*://*.healow.com/*",
+    "*://*.athenahealth.com/*",
+    "*://*.cerner.com/*",
+    "https://your-careguide-backend.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.mychart.org/*",
+        "*://*.mychart.com/*",
+        "*://*.followmyhealth.com/*",
+        "*://*.healow.com/*",
+        "*://*.athenahealth.com/*",
+        "*://*.cerner.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["sidebar.css"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "128": "icons/icon128.png"
+  }
+}
