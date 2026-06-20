@@ -31,3 +31,4 @@ venv/
 
 # Zip builds
 *.zip
+background.js 

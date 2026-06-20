@@ -16,7 +16,13 @@
     "*://*.healow.com/*",
     "*://*.athenahealth.com/*",
     "*://*.cerner.com/*",
-    "https://your-careguide-backend.com/*"
+    "*://*.myuhcare.com/*",
+    "*://*.patient.mhealthcoach.net/*",
+    "*://*.nextgen.com/*",
+    "*://*.eclinicalweb.com/*",
+    "*://*.portalconnect.net/*",
+    "*://*.meditech.com/*",
+    "https://api.anthropic.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -29,7 +35,13 @@
         "*://*.followmyhealth.com/*",
         "*://*.healow.com/*",
         "*://*.athenahealth.com/*",
-        "*://*.cerner.com/*"
+        "*://*.cerner.com/*",
+        "*://*.myuhcare.com/*",
+        "*://*.nextgen.com/*",
+        "*://*.eclinicalweb.com/*",
+        "*://*.portalconnect.net/*",
+        "*://*.meditech.com/*",
+        "*://*.sutterhealth.org/*"
       ],
       "js": ["content.js"],
       "css": ["sidebar.css"]

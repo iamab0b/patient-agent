@@ -2,12 +2,45 @@
 // Runs on patient portal pages. Detects the portal, injects the sidebar,
 // handles voice input, and highlights DOM elements based on user intent.
 
+try {
+  window.__careguideDebugVersion = "20240620-noSpeak";
+
+  if (typeof window.speechSynthesis === "undefined") {
+    window.speechSynthesis = {
+      speak: () => {
+        console.log("CareGuide fallback speechSynthesis.speak() called");
+      },
+    };
+    console.log("CareGuide speechSynthesis fallback installed");
+  }
+
+  if (typeof window.SpeechSynthesisUtterance === "undefined") {
+    window.SpeechSynthesisUtterance = class {
+      constructor(text) {
+        this.text = text;
+        this.rate = 1.0;
+        this.pitch = 1.0;
+      }
+    };
+    console.log("CareGuide SpeechSynthesisUtterance fallback installed");
+  }
+} catch (e) {
+  console.log("CareGuide speech fallback install failed:", e);
+}
+
 const PORTALS = {
+  "mychart.org": "Epic MyChart",
   "mychart.com": "Epic MyChart",
   "followmyhealth.com": "FollowMyHealth",
   "healow.com": "Healow",
   "athenahealth.com": "Athena Health",
   "cerner.com": "Cerner",
+  "myuhcare.com": "UH MyChart",
+  "nextgen.com": "NextGen Patient Portal",
+  "eclinicalweb.com": "eClinicalWorks",
+  "portalconnect.net": "PortalConnect",
+  "meditech.com": "Meditech",
+  "sutterhealth.org": "Sutter Health MyHealth Online",
 };
 
 // ── 1. Detect which portal we're on ─────────────────────────────────────────
@@ -69,8 +102,20 @@ function injectSidebar(portalName) {
   `;
 
   document.body.appendChild(sidebar);
+  console.log("CareGuide sidebar injected for portal:", portalName);
   attachSidebarEvents();
 }
+
+// ── Global Error Capture ───────────────────────────────────────────────────
+window.addEventListener("error", (event) => {
+  console.error("CareGuide uncaught error:", event.error || event.message, event.filename, event.lineno, event.colno);
+  setResponse("An internal extension error occurred. Check the console for details.");
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  console.error("CareGuide unhandled rejection:", event.reason);
+  setResponse("An internal extension error occurred. Check the console for details.");
+});
 
 // ── 3. Voice Input (Web Speech API) ─────────────────────────────────────────
 let recognition;
@@ -194,7 +239,6 @@ function highlightElement(intent) {
     found.scrollIntoView({ behavior: "smooth", block: "center" });
     lastHighlighted = found;
     setResponse(`I found the ${intent} section and highlighted it for you. Click the glowing button to continue.`);
-    speak(`I found the ${intent} section. It's highlighted on your screen.`);
   } else {
     setResponse(`I couldn't find a "${intent}" button on this page. Try scrolling down or check the navigation menu.`);
   }
@@ -219,11 +263,18 @@ function findByText(intent) {
 // ── 6. Claude AI Explanation ─────────────────────────────────────────────────
 async function askClaude(userText) {
   try {
-    // Get selected text from page for context
     const selectedText = window.getSelection()?.toString() || "";
     const language = getSelectedLanguageLabel();
 
-    const response = await chrome.runtime.sendMessage({
+    console.log("askClaude called", { userText, selectedText });
+
+    if (!chrome?.runtime?.sendMessage) {
+      console.log("Chrome runtime messaging unavailable.");
+      setResponse("Internal messaging error: browser runtime not available.");
+      return;
+    }
+
+    const response = await sendRuntimeMessage({
       type: "ASK_CLAUDE",
       payload: {
         userText,
@@ -233,22 +284,44 @@ async function askClaude(userText) {
       },
     });
 
+    console.log("Got response:", response);
+
     if (response?.reply) {
       setResponse(response.reply);
-      speak(response.reply);
     } else {
+      console.log("Full response object:", JSON.stringify(response));
       setResponse("I had trouble getting a response. Please try again.");
     }
   } catch (err) {
-    setResponse("Connection error. Please check your internet.");
+    console.log("askClaude error:", err.message);
+    setResponse("Connection error: " + err.message);
   }
 }
 
 // ── 7. Text-to-Speech ────────────────────────────────────────────────────────
 function speak(text) {
-  chrome.storage.local.get("voiceEnabled", ({ voiceEnabled }) => {
-    if (voiceEnabled === false) return;
-    chrome.tts.speak(text, { rate: 0.9, pitch: 1.0 });
+  try {
+    console.log("speak() called but disabled in this build", { text });
+    return;
+  } catch (e) {
+    console.log("TTS disabled fallback error:", e);
+  }
+}
+
+function sendRuntimeMessage(message) {
+  return new Promise((resolve, reject) => {
+    if (!chrome?.runtime?.sendMessage) {
+      reject(new Error("chrome.runtime.sendMessage is unavailable"));
+      return;
+    }
+
+    chrome.runtime.sendMessage(message, (response) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+      } else {
+        resolve(response);
+      }
+    });
   });
 }
 
@@ -257,13 +330,20 @@ async function sendCaregiverSummary() {
   const pageText = document.body.innerText.substring(0, 3000);
   setResponse("Preparing summary for your caregiver...");
 
-  const response = await chrome.runtime.sendMessage({
-    type: "CAREGIVER_SUMMARY",
-    payload: { pageText, portalName: detectPortal() },
-  });
+  try {
+    const response = await sendRuntimeMessage({
+      type: "CAREGIVER_SUMMARY",
+      payload: { pageText, portalName: detectPortal() },
+    });
 
-  if (response?.summary) {
-    setResponse(`✅ Summary ready!\n\n${response.summary}\n\nShare this with your caregiver.`);
+    if (response?.summary) {
+      setResponse(`✅ Summary ready!\n\n${response.summary}\n\nShare this with your caregiver.`);
+    } else {
+      setResponse("Error generating caregiver summary. Please try again.");
+    }
+  } catch (err) {
+    console.log("sendCaregiverSummary error:", err);
+    setResponse("Could not connect to the extension background service.");
   }
 }
 
@@ -271,15 +351,33 @@ async function sendCaregiverSummary() {
 // When user selects text on the page, offer to explain it
 document.addEventListener("mouseup", () => {
   const selected = window.getSelection()?.toString().trim();
+  console.log("selection mouseup", { selected });
   if (selected && selected.length > 10 && selected.length < 500) {
     const responseEl = document.getElementById("cg-response-text");
     if (responseEl) {
       responseEl.innerHTML = `
         <em>Selected: "${selected.substring(0, 60)}..."</em><br><br>
-        <button id="cg-explain-selection" style="margin-top:8px">Explain this</button>
+        <button id="cg-explain-selection" style="
+          margin-top:8px;
+          padding:8px 12px;
+          background:#2563eb;
+          color:white;
+          border:none;
+          border-radius:8px;
+          cursor:pointer;
+          font-size:13px;
+        ">Explain this</button>
       `;
-      document.getElementById("cg-explain-selection")?.addEventListener("click", () => {
-        askClaude(`Please explain this medical term or result in simple language: "${selected}"`);
+    }
+
+    const sidebar = document.getElementById("careguide-sidebar");
+    if (sidebar) {
+      sidebar.addEventListener("click", function handler(e) {
+        console.log("sidebar click event", { targetId: e.target?.id });
+        if (e.target.id === "cg-explain-selection") {
+          this.removeEventListener("click", handler);
+          askClaude(`Please explain this in simple language: "${selected}"`);
+        }
       });
     }
   }
@@ -287,15 +385,24 @@ document.addEventListener("mouseup", () => {
 
 // ── 10. Event Listeners ──────────────────────────────────────────────────────
 function attachSidebarEvents() {
-  document.getElementById("cg-voice-btn")?.addEventListener("click", startVoice);
+  console.log("attachSidebarEvents called");
+  document.getElementById("cg-voice-btn")?.addEventListener("click", () => {
+    console.log("voice button clicked");
+    startVoice();
+  });
   document.getElementById("cg-close")?.addEventListener("click", () => {
+    console.log("close button clicked");
     document.getElementById("careguide-sidebar")?.remove();
   });
-  document.getElementById("cg-caregiver-btn")?.addEventListener("click", sendCaregiverSummary);
+  document.getElementById("cg-caregiver-btn")?.addEventListener("click", () => {
+    console.log("caregiver summary clicked");
+    sendCaregiverSummary();
+  });
 
   document.querySelectorAll(".cg-action-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const intent = btn.dataset.intent;
+      console.log("action button clicked", intent);
       highlightElement(intent);
     });
   });
@@ -316,5 +423,4 @@ function getSelectedLanguageLabel() {
   return select?.options[select.selectedIndex]?.text || "English";
 }
 
-// ── Init ─────────────────────────────────────────────────────────────────────
-injectSidebar(detectPortal());
+// ── Init ─────────────────────────────────────────────────────────────────────console.log("CareGuide content script loaded on:", window.location.href);injectSidebar(detectPortal());
