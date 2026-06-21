@@ -474,18 +474,14 @@ async function sendCaregiverSummary() {
       return;
     }
 
-    setResponse("Sending summary to your caregiver...");
+    const subject = `Portal summary for your caregiver`;
+    const mailtoUrl =
+      `mailto:${encodeURIComponent(caregiverEmail)}` +
+      `?subject=${encodeURIComponent(subject)}` +
+      `&body=${encodeURIComponent(summaryResponse.summary)}`;
+    window.open(mailtoUrl, "_blank");
 
-    const sendResponse = await sendRuntimeMessage({
-      type: "SEND_CAREGIVER_EMAIL",
-      payload: { to: caregiverEmail, message: summaryResponse.summary },
-    });
-
-    if (sendResponse?.success) {
-      setResponse(`✅ Summary emailed to your caregiver at ${caregiverEmail}.`);
-    } else {
-      setResponse(`Could not email the summary: ${sendResponse?.error || "please try again."}`);
-    }
+    setResponse(`✅ Opening an email to your caregiver at ${caregiverEmail}. Press Send in the compose window to deliver it.`);
   } catch (err) {
     console.log("sendCaregiverSummary error:", err);
     setResponse("Could not connect to the extension background service.");
