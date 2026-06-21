@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Schedule an Appointment</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="appointments">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; <a href="appointments.html">Appointments</a> &rsaquo; Schedule</div>
+        <h1>Schedule an Appointment</h1>
+        <div class="note">Online scheduling is not for emergencies. If this is an emergency, call 911.</div>
+
+        <div class="stepper">
+          <div class="step active" data-step="1">1. Provider</div>
+          <div class="step" data-step="2">2. Reason</div>
+          <div class="step" data-step="3">3. Location</div>
+          <div class="step" data-step="4">4. Time</div>
+          <div class="step" data-step="5">5. Verify</div>
+        </div>
+
+        <!-- Step 1: Provider -->
+        <section id="s1">
+          <h3>Schedule with a provider you've seen before</h3>
+          <button class="choice" onclick="pick('provider','Sarah Chen, MD — Internal Medicine',2)">
+            <div class="t">Sarah Chen, MD</div><div class="d">Internal Medicine (Primary Care Provider)</div></button>
+          <button class="choice" onclick="pick('provider','Raymond Patel, MD — Cardiology',2)">
+            <div class="t">Raymond Patel, MD</div><div class="d">Cardiology</div></button>
+          <button class="choice" onclick="pick('provider','James Okafor, MD — Endocrinology',2)">
+            <div class="t">James Okafor, MD</div><div class="d">Endocrinology</div></button>
+          <button class="choice" onclick="pick('provider','Maria Lopez, NP — Primary Care',2)">
+            <div class="t">Maria Lopez, NP</div><div class="d">Primary Care</div></button>
+        </section>
+
+        <!-- Step 2: Reason -->
+        <section id="s2" style="display:none">
+          <h3>What kind of appointment are you looking for?</h3>
+          <button class="choice" onclick="pick('reason','Video Visit with your clinician',3)">
+            <div class="t">Video Visit</div><div class="d">Online video visit for non-urgent problems</div></button>
+          <button class="choice" onclick="pick('reason','Office Visit — Return Primary Care',3)">
+            <div class="t">Office Visit: Return Primary Care</div><div class="d">A general in-person visit</div></button>
+          <button class="choice" onclick="pick('reason','Office Visit — Annual Physical',3)">
+            <div class="t">Office Visit: Annual Physical</div><div class="d">Preventive yearly exam</div></button>
+          <div class="btn-row"><button class="btn" onclick="go(1)">Back</button></div>
+        </section>
+
+        <!-- Step 3: Location -->
+        <section id="s3" style="display:none">
+          <h3>Choose a location</h3>
+          <button class="choice" onclick="pick('location','Internal Medicine - Springfield, 100 Center St',4)">
+            <div class="t">Internal Medicine - Springfield</div><div class="d">100 Center St, Springfield &middot; 2.1 mi</div></button>
+          <button class="choice" onclick="pick('location','Springfield Medical Center, 500 Health Pkwy',4)">
+            <div class="t">Springfield Medical Center</div><div class="d">500 Health Pkwy, Springfield &middot; 4.8 mi</div></button>
+          <div class="btn-row"><button class="btn" onclick="go(2)">Back</button></div>
+        </section>
+
+        <!-- Step 4: Time -->
+        <section id="s4" style="display:none">
+          <h3>Pick a time — Monday, June 29, 2026</h3>
+          <button class="choice" onclick="pick('time','Mon, June 29, 2026 at 9:00 AM',5)"><div class="t">9:00 AM</div></button>
+          <button class="choice" onclick="pick('time','Mon, June 29, 2026 at 11:30 AM',5)"><div class="t">11:30 AM</div></button>
+          <button class="choice" onclick="pick('time','Mon, June 29, 2026 at 2:15 PM',5)"><div class="t">2:15 PM</div></button>
+          <button class="choice" onclick="pick('time','Mon, June 29, 2026 at 3:45 PM',5)"><div class="t">3:45 PM</div></button>
+          <div class="btn-row"><button class="btn" onclick="go(3)">Back</button></div>
+        </section>
+
+        <!-- Step 5: Verify -->
+        <section id="s5" style="display:none">
+          <h3>Verify and schedule</h3>
+          <div class="card col-12">
+            <p><span class="muted">Provider:</span> <b id="v-provider">—</b></p>
+            <p><span class="muted">Reason:</span> <b id="v-reason">—</b></p>
+            <p><span class="muted">Location:</span> <b id="v-location">—</b></p>
+            <p><span class="muted">Time:</span> <b id="v-time">—</b></p>
+          </div>
+          <label class="field" style="margin-top:12px">Reason for visit (optional)
+            <textarea rows="2" placeholder="Briefly describe why you'd like to be seen"></textarea>
+          </label>
+          <div class="btn-row">
+            <button class="btn" onclick="go(4)">Back</button>
+            <button class="btn btn-primary" data-demo-action="Demo: your appointment has been scheduled.">Schedule it</button>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="portal.js"></script>
+  <script>
+    var choice = {provider:'—',reason:'—',location:'—',time:'—'};
+    function go(n){
+      for (var i=1;i<=5;i++) document.getElementById('s'+i).style.display = (i===n)?'':'none';
+      document.querySelectorAll('.stepper .step').forEach(function(s){
+        var d = +s.dataset.step;
+        s.classList.toggle('active', d===n);
+        s.classList.toggle('done', d<n);
+      });
+      window.scrollTo(0,0);
+    }
+    function pick(key,val,next){
+      choice[key]=val;
+      if (next===5){
+        document.getElementById('v-provider').textContent = choice.provider;
+        document.getElementById('v-reason').textContent = choice.reason;
+        document.getElementById('v-location').textContent = choice.location;
+        document.getElementById('v-time').textContent = choice.time;
+      }
+      go(next);
+    }
+  </script>
+</body>
+</html>
