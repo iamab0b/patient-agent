@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Health Summary</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="health">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; Health Summary</div>
+        <h1>Health Summary</h1>
+
+        <div class="banner" style="border:1px solid var(--line);border-radius:10px;margin-bottom:16px">
+          <span>Height: <b>5' 10"</b></span>
+          <span>Weight: <b>198 lb</b></span>
+          <span>Blood Pressure: <b>138/88</b></span>
+          <span>Recorded: <b>Jun 15, 2026</b></span>
+          <span>Last visit: <b>Jun 15, 2026 — Office Visit</b></span>
+        </div>
+
+        <div class="grid">
+          <div class="card col-6">
+            <div class="section-title"><h3>Current Health Issues</h3><a href="conditions.html">View details</a></div>
+            <ul>
+              <li>Type 2 diabetes mellitus</li>
+              <li>Essential hypertension</li>
+              <li>Hyperlipidemia (high cholesterol)</li>
+              <li>Hypokalemia (low potassium)</li>
+            </ul>
+          </div>
+
+          <div class="card col-6">
+            <div class="section-title"><h3>Medications</h3><a href="medications.html">Go to Medications</a></div>
+            <ul>
+              <li>Metformin 500 mg — twice daily with meals</li>
+              <li>Lisinopril 10 mg — once daily in the morning</li>
+              <li>Atorvastatin 20 mg — at bedtime</li>
+              <li>Aspirin 81 mg — once daily (over the counter)</li>
+            </ul>
+          </div>
+
+          <div class="card col-6">
+            <div class="section-title"><h3>Allergies</h3></div>
+            <ul>
+              <li><b>Penicillin</b> — Reaction: rash</li>
+              <li><b>Sulfa drugs</b> — Reaction: hives</li>
+            </ul>
+          </div>
+
+          <div class="card col-6">
+            <div class="section-title"><h3>Immunizations</h3><a href="immunizations.html">View all</a></div>
+            <ul>
+              <li>Influenza (flu) — Oct 12, 2025</li>
+              <li>Shingles (Shingrix) — Apr 3, 2024</li>
+              <li>Tdap (Tetanus/Diphtheria/Pertussis) — Jun 8, 2019</li>
+              <li>Pneumococcal (pneumonia) — <span class="badge warn">Overdue</span></li>
+            </ul>
+          </div>
+
+          <div class="card col-6">
+            <div class="section-title"><h3>Recent Test Results</h3><a href="test-results.html">Go to Test Results</a></div>
+            <ul>
+              <li>Lipid Profile — Jun 15, 2026</li>
+              <li>Hemoglobin A1c — Jun 15, 2026</li>
+              <li>Comprehensive Metabolic Panel — Jun 15, 2026</li>
+              <li>Complete Blood Count — Jun 15, 2026</li>
+            </ul>
+          </div>
+
+          <div class="card col-6">
+            <div class="section-title"><h3>Recommended Actions (3)</h3></div>
+            <ul>
+              <li>Flu shot — due this season <a href="schedule.html">Schedule</a></li>
+              <li>Diabetic eye exam — due <a href="schedule.html">Schedule</a></li>
+              <li>Pneumonia vaccine — <span class="badge warn">overdue</span> <a href="schedule.html">Schedule</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="portal.js"></script>
+</body>
+</html>

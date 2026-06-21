@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Pay Bill</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="billing">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; <a href="billing.html">Billing</a> &rsaquo; Pay Bill</div>
+        <h1>Pay Your Bill</h1>
+
+        <div class="stepper">
+          <div class="step active" data-step="1">1. Amount</div>
+          <div class="step" data-step="2">2. Payment Method</div>
+          <div class="step" data-step="3">3. Review</div>
+          <div class="step" data-step="4">4. Confirmation</div>
+        </div>
+
+        <!-- Step 1: Amount -->
+        <section id="p1">
+          <h3>How much would you like to pay?</h3>
+          <button class="choice selected" onclick="pickAmount(this,'245.00')">
+            <div class="t">Pay full balance — $245.00</div></button>
+          <button class="choice" onclick="pickAmount(this,'122.50')">
+            <div class="t">Pay half — $122.50</div></button>
+          <label class="field" style="max-width:240px;margin-top:8px">Other amount ($)
+            <input type="number" id="other-amt" placeholder="0.00" oninput="useOther()">
+          </label>
+          <div class="btn-row"><button class="btn btn-primary" onclick="go(2)">Continue</button></div>
+        </section>
+
+        <!-- Step 2: Payment method -->
+        <section id="p2" style="display:none">
+          <h3>Choose a payment method</h3>
+          <button class="choice selected" onclick="pickMethod(this,'Visa ending 4242')">
+            <div class="t">Visa ending in 4242</div><div class="d">Saved card</div></button>
+          <button class="choice" onclick="pickMethod(this,'Bank account ending 8810')">
+            <div class="t">Bank account ending in 8810</div><div class="d">Saved account</div></button>
+          <button class="choice" onclick="pickMethod(this,'New card')">
+            <div class="t">Use a new card</div></button>
+          <div class="btn-row">
+            <button class="btn" onclick="go(1)">Back</button>
+            <button class="btn btn-primary" onclick="go(3)">Continue</button>
+          </div>
+        </section>
+
+        <!-- Step 3: Review -->
+        <section id="p3" style="display:none">
+          <h3>Review your payment</h3>
+          <div class="card col-12">
+            <p><span class="muted">Amount:</span> <b>$<span id="r-amt">245.00</span></b></p>
+            <p><span class="muted">Payment method:</span> <b id="r-method">Visa ending 4242</b></p>
+            <p><span class="muted">Pay to:</span> <b>Springfield Medical Group</b></p>
+          </div>
+          <div class="btn-row">
+            <button class="btn" onclick="go(2)">Back</button>
+            <button class="btn btn-primary" onclick="submitPayment()">Submit Payment</button>
+          </div>
+        </section>
+
+        <!-- Step 4: Confirmation -->
+        <section id="p4" style="display:none">
+          <div class="card col-12" style="text-align:center">
+            <div style="font-size:42px">✅</div>
+            <h2>Payment submitted</h2>
+            <p class="muted">A payment of $<span id="c-amt">245.00</span> was submitted to Springfield Medical Group.</p>
+            <div class="btn-row" style="justify-content:center">
+              <a class="btn btn-primary" href="billing.html">Back to Billing</a>
+              <a class="btn" href="demo-portal.html">Go to Home</a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="portal.js"></script>
+  <script>
+    var amount = "245.00", method = "Visa ending 4242";
+    function go(n){
+      ['1','2','3','4'].forEach(function(i){ document.getElementById('p'+i).style.display = (i==n)?'':'none'; });
+      document.querySelectorAll('.stepper .step').forEach(function(s){
+        var d=+s.dataset.step; s.classList.toggle('active',d===n); s.classList.toggle('done',d<n);
+      });
+      if (n===3){ document.getElementById('r-amt').textContent=amount; document.getElementById('r-method').textContent=method; }
+      window.scrollTo(0,0);
+    }
+    function pickAmount(btn,val){ clearSel('#p1'); btn.classList.add('selected'); amount=val; document.getElementById('other-amt').value=''; }
+    function useOther(){ var v=document.getElementById('other-amt').value; if(v){ clearSel('#p1'); amount=parseFloat(v).toFixed(2); } }
+    function pickMethod(btn,val){ clearSel('#p2'); btn.classList.add('selected'); method=val; }
+    function clearSel(scope){ document.querySelectorAll(scope+' .choice').forEach(function(c){c.classList.remove('selected');}); }
+    function submitPayment(){
+      if (parseFloat(amount) >= 245) Portal.setFlag('bill:paid', true);
+      Portal.notify('Payment of $'+amount+' submitted to Springfield Medical Group.');
+      document.getElementById('c-amt').textContent = amount;
+      go(4);
+    }
+  </script>
+</body>
+</html>

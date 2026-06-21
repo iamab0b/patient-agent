@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Statement</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="billing">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; <a href="billing.html">Billing</a> &rsaquo; Statement</div>
+        <h1>Statement — June 2026</h1>
+        <p class="muted">Guarantor: John Smith &middot; Statement date: June 20, 2026 &middot; Due July 5, 2026</p>
+
+        <div class="card col-12">
+          <table class="results">
+            <thead><tr><th>Date</th><th>Description</th><th>Charge</th><th>Insurance</th><th>You Owe</th></tr></thead>
+            <tbody>
+              <tr><td>Jun 15, 2026</td><td>Office Visit — Internal Medicine</td><td>$180.00</td><td>-$120.00</td><td>$60.00</td></tr>
+              <tr><td>Jun 15, 2026</td><td>Lipid Profile (lab)</td><td>$95.00</td><td>-$60.00</td><td>$35.00</td></tr>
+              <tr><td>Jun 15, 2026</td><td>Hemoglobin A1c (lab)</td><td>$110.00</td><td>-$60.00</td><td>$50.00</td></tr>
+              <tr><td>Jun 15, 2026</td><td>Comprehensive Metabolic Panel (lab)</td><td>$150.00</td><td>-$50.00</td><td>$100.00</td></tr>
+              <tr><td colspan="4" style="text-align:right"><b>Total due</b></td><td><b>$245.00</b></td></tr>
+            </tbody>
+          </table>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="pay-bill.html" data-flag-unless="bill:paid">Pay this bill</a>
+            <span class="badge ok" data-flag-when="bill:paid">Paid ✓</span>
+            <button class="btn" data-act="Statement downloaded (PDF).">Download PDF</button>
+            <a class="btn" href="compose-message.html">Question about this bill</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="portal.js"></script>
+</body>
+</html>

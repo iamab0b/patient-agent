@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Letters</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="documents">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; <a href="documents.html">Documents</a> &rsaquo; Letters</div>
+        <h1>Letters</h1>
+
+        <div id="list">
+          <a class="row-item" href="#" onclick="openLetter('referral');return false;" style="text-decoration:none;color:inherit">
+            <div><h4>Referral confirmation</h4><div class="meta">Jun 15, 2026 &middot; Sarah Chen, MD</div></div>
+            <span class="btn btn-ghost">Read</span>
+          </a>
+          <a class="row-item" href="#" onclick="openLetter('reminder');return false;" style="text-decoration:none;color:inherit">
+            <div><h4>Care reminder — vaccines due</h4><div class="meta">Jun 7, 2026 &middot; MyHealth Online</div></div>
+            <span class="btn btn-ghost">Read</span>
+          </a>
+        </div>
+
+        <div id="reader" class="card col-12" style="display:none">
+          <h3 id="l-title"></h3>
+          <p class="muted" id="l-meta"></p>
+          <div class="note-body" id="l-body"></div>
+          <div class="btn-row">
+            <button class="btn" onclick="closeLetter()">Back to letters</button>
+            <button class="btn" data-act="Letter downloaded (PDF).">Download PDF</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="portal.js"></script>
+  <script>
+    var LETTERS = {
+      referral: {title:"Referral confirmation", meta:"Jun 15, 2026 · Sarah Chen, MD",
+        body:"<p>Dear Mr. Smith,</p><p>This confirms that a referral to Cardiology (Dr. Raymond Patel) has been authorized for up to 3 visits, valid through December 15, 2026. Please call (555) 555-0144 to schedule, or use Schedule an Appointment in this portal.</p><p>Sincerely,<br>Sarah Chen, MD</p>"},
+      reminder: {title:"Care reminder — vaccines due", meta:"Jun 7, 2026 · MyHealth Online",
+        body:"<p>Dear Mr. Smith,</p><p>Our records show you are due for a flu shot and overdue for the pneumonia vaccine. Please schedule at your convenience. You can review all recommendations in your Health Summary.</p>"}
+    };
+    function openLetter(k){
+      var l = LETTERS[k];
+      document.getElementById('l-title').textContent = l.title;
+      document.getElementById('l-meta').textContent = l.meta;
+      document.getElementById('l-body').innerHTML = l.body;
+      document.getElementById('list').style.display='none';
+      document.getElementById('reader').style.display='';
+      window.scrollTo(0,0);
+    }
+    function closeLetter(){
+      document.getElementById('reader').style.display='none';
+      document.getElementById('list').style.display='';
+    }
+  </script>
+</body>
+</html>

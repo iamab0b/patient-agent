@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — New Message</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="messages">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; <a href="messages.html">Messages</a> &rsaquo; New Message</div>
+        <h1>New Message</h1>
+        <div class="note">For a medical emergency, call 911. Messages are usually answered within 1–2 business days.</div>
+
+        <form onsubmit="send();return false;">
+          <div class="card col-12">
+            <label class="field">To
+              <select id="to">
+                <option>Sarah Chen, MD (Primary Care)</option>
+                <option>Raymond Patel, MD (Cardiology)</option>
+                <option>James Okafor, MD (Endocrinology)</option>
+                <option>Billing Customer Service</option>
+                <option>Nurse Line</option>
+              </select>
+            </label>
+            <label class="field">Subject<input type="text" id="subject" placeholder="e.g. Question about my medication"></label>
+            <label class="field">Message<textarea rows="5" id="body" placeholder="Type your message here"></textarea></label>
+            <div class="btn-row">
+              <a class="btn" href="messages.html">Cancel</a>
+              <button type="submit" class="btn btn-primary">Send message</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="portal.js"></script>
+  <script>
+    function send(){
+      var to = document.getElementById('to').value;
+      if (!document.getElementById('body').value.trim()){ alert('Please type a message.'); return; }
+      Portal.notify('Message sent to ' + to + '.');
+      location.href = 'messages.html';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Appointments and Visits</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="appointments">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; Appointments and Visits</div>
+        <div class="section-title">
+          <h1>Appointments and Visits</h1>
+          <a class="btn btn-primary" href="schedule.html">Schedule an appointment</a>
+        </div>
+
+        <div class="tabs">
+          <button class="active" onclick="showTab(this,'all')">All</button>
+          <button onclick="showTab(this,'upcoming')">Upcoming</button>
+          <button onclick="showTab(this,'past')">Past</button>
+        </div>
+
+        <section class="tab-upcoming">
+          <h3>Upcoming visits</h3>
+
+          <div class="row-item">
+            <div>
+              <h4>Office Visit — Sarah Chen, MD <span class="badge ok" data-flag-when="appt:chen:checkedin">Checked in ✓</span></h4>
+              <div class="meta">Internal Medicine &middot; June 25, 2026 &middot; 2:30 PM &middot; <b>Video Visit</b></div>
+              <div class="btn-row">
+                <a class="btn btn-primary" href="echeckin.html" data-flag-unless="appt:chen:checkedin">eCheck-in</a>
+                <button class="btn" data-act="Joining your video visit with Dr. Chen…">Join video visit</button>
+                <a class="btn" href="schedule.html">Reschedule</a>
+                <button class="btn" data-act="Your appointment with Dr. Chen was cancelled." data-flag="appt:chen:cancelled" data-done="Cancelled">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row-item">
+            <div>
+              <h4>Cardiology Follow-up — Raymond Patel, MD</h4>
+              <div class="meta">Cardiology &middot; July 10, 2026 &middot; 10:00 AM &middot; Springfield Cardiology, 220 Elm St</div>
+              <div class="btn-row">
+                <a class="btn" href="schedule.html">Reschedule</a>
+                <button class="btn" data-act="Your appointment with Dr. Patel was cancelled." data-flag="appt:patel:cancelled" data-done="Cancelled">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-past">
+          <h3 style="margin-top:18px">Past visits</h3>
+
+          <div class="row-item">
+            <div>
+              <h4>Office Visit — Sarah Chen, MD <span class="badge muted">Not yet viewed</span></h4>
+              <div class="meta">Internal Medicine - Springfield &middot; June 15, 2026</div>
+              <div class="btn-row">
+                <a class="btn btn-ghost" href="visit-details.html">View After Visit Summary</a>
+                <a class="btn btn-ghost" href="visit-notes.html">View clinical notes</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="row-item">
+            <div>
+              <h4>Telephone Visit — Raymond Patel, MD</h4>
+              <div class="meta">Cardiology &middot; May 2, 2026</div>
+              <div class="btn-row">
+                <a class="btn btn-ghost" href="visit-details.html">View visit details</a>
+                <a class="btn btn-ghost" href="visit-notes.html">View clinical notes</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="row-item">
+            <div>
+              <h4>Office Visit — James Okafor, MD</h4>
+              <div class="meta">Endocrinology - Springfield &middot; March 18, 2026</div>
+              <div class="btn-row">
+                <a class="btn btn-ghost" href="visit-details.html">View After Visit Summary</a>
+                <a class="btn btn-ghost" href="visit-notes.html">View clinical notes</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="row-item">
+            <div>
+              <h4>Lab Visit — Regional Medical Laboratory</h4>
+              <div class="meta">Laboratory Medicine - Springfield &middot; February 10, 2026</div>
+              <div class="btn-row">
+                <a class="btn btn-ghost" href="visit-details.html">View After Visit Summary</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row"><button class="btn" data-act="All of your past visits are now shown.">Load more past visits</button></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="portal.js"></script>
+  <script>
+    function showTab(btn,which){
+      document.querySelectorAll('.tabs button').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      document.querySelector('.tab-upcoming').style.display = (which==='past')?'none':'';
+      document.querySelector('.tab-past').style.display = (which==='upcoming')?'none':'';
+    }
+  </script>
+</body>
+</html>

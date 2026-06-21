@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Billing</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="billing">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; Billing</div>
+        <h1>Billing &amp; Payments</h1>
+
+        <!-- Balance: swaps based on whether the demo bill has been paid -->
+        <div class="card col-12" data-flag-unless="bill:paid">
+          <div class="section-title"><h3>Account Balance</h3></div>
+          <p style="font-size:28px;font-weight:800;margin:0">$245.00</p>
+          <p class="muted">Due July 5, 2026 &middot; Guarantor: John Smith</p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="pay-bill.html">Pay now</a>
+            <a class="btn" href="statement-detail.html">View statement</a>
+          </div>
+        </div>
+        <div class="card col-12" data-flag-when="bill:paid">
+          <div class="section-title"><h3>Account Balance</h3></div>
+          <p style="font-size:28px;font-weight:800;margin:0;color:var(--success)">$0.00</p>
+          <p class="muted">Paid in full &middot; Thank you!</p>
+          <div class="btn-row"><a class="btn" href="statement-detail.html">View statement</a></div>
+        </div>
+
+        <h3 style="margin-top:18px">Statements</h3>
+        <a class="row-item" href="statement-detail.html" style="text-decoration:none;color:inherit">
+          <div><h4>Statement — June 2026</h4><div class="meta">Office visit &amp; labs &middot; $245.00</div></div>
+          <span class="btn btn-ghost">View</span>
+        </a>
+        <a class="row-item" href="statement-detail.html" style="text-decoration:none;color:inherit">
+          <div><h4>Statement — March 2026</h4><div class="meta">Endocrinology visit &middot; $0.00 (Paid)</div></div>
+          <span class="btn btn-ghost">View</span>
+        </a>
+
+        <h3 style="margin-top:18px">Billing Settings</h3>
+        <div class="row-item">
+          <div><h4>Paperless billing</h4><div class="meta">Receive statements by email instead of mail.</div></div>
+          <button class="btn" data-act="Paperless billing turned on." data-flag="bill:paperless" data-done="On ✓">Turn on</button>
+        </div>
+        <div class="row-item">
+          <div><h4>Payment plan</h4><div class="meta">Set up monthly installments for a balance.</div></div>
+          <button class="btn" data-act="A payment-plan request was submitted.">Request plan</button>
+        </div>
+        <p class="disclaimer">Questions about your bill? <a href="compose-message.html">Message billing customer service</a> or call (555) 555-0123.</p>
+      </div>
+    </main>
+  </div>
+  <script src="portal.js"></script>
+</body>
+</html>

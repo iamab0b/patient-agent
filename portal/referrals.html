@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Referrals</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="care">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; <a href="care-team.html">Care Team</a> &rsaquo; Referrals</div>
+        <h1>My Referrals</h1>
+
+        <div class="row-item">
+          <div>
+            <h4>Cardiology — Raymond Patel, MD <span class="badge ok">Authorized</span></h4>
+            <div class="meta">Referred by Sarah Chen, MD &middot; Jun 15, 2026 &middot; 3 visits &middot; Valid through Dec 15, 2026</div>
+          </div>
+          <a class="btn btn-ghost" href="schedule.html">Schedule</a>
+        </div>
+
+        <div class="row-item">
+          <div>
+            <h4>Ophthalmology (Diabetic eye exam) <span class="badge warn">Pending</span></h4>
+            <div class="meta">Referred by Sarah Chen, MD &middot; Jun 15, 2026 &middot; Awaiting insurance approval</div>
+          </div>
+          <button class="btn" data-act="A status update was requested for your ophthalmology referral.">Check status</button>
+        </div>
+
+        <div class="row-item">
+          <div>
+            <h4>Endocrinology — James Okafor, MD <span class="badge muted">Completed</span></h4>
+            <div class="meta">Referred by Sarah Chen, MD &middot; Mar 1, 2026 &middot; Used 1 of 1 visits</div>
+          </div>
+          <a class="btn btn-ghost" href="provider-detail.html?p=okafor">View provider</a>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="portal.js"></script>
+</body>
+</html>

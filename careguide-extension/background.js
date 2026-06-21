@@ -6,6 +6,9 @@ const BACKEND_URL = "https://your-careguide-backend.com"; // swap with your Clou
 const ANTHROPIC_API_KEY = "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";
 const CLAUDE_API_ENDPOINT = "https://api.anthropic.com/v1/messages";
 
+// When calling from browser contexts, Anthropic requires an explicit header
+// acknowledging direct-browser access. This is unsafe for production; prefer
+// routing requests through a backend proxy so API keys are not exposed.
 function getAnthropicHeaders() {
   return {
     "Content-Type": "application/json",
@@ -109,9 +112,32 @@ Your rules:
       messages: [{ role: "user", content: userMessage }],
     };
 
-    if (!isAnthropicKeyConfigured()) {
-      return { reply: "CareGuide is not configured with an Anthropic API key. Please set ANTHROPIC_API_KEY in background.js." };
+    // Prefer routing via a backend proxy if configured to avoid exposing API keys
+    if (BACKEND_URL && !BACKEND_URL.includes('your-careguide-backend.com')) {
+      try {
+        const proxyResp = await fetch(`${BACKEND_URL.replace(/\/+$/,'')}/claude`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestBody }),
+        });
+        if (!proxyResp.ok) {
+          const txt = await proxyResp.text().catch(() => '');
+          console.error('Backend proxy error', proxyResp.status, txt);
+          return { reply: `Backend proxy error ${proxyResp.status} ${txt}` };
+        }
+        const proxyData = await proxyResp.json().catch(() => null);
+        return { reply: proxyData?.reply || proxyData?.text || 'No reply from backend proxy.' };
+      } catch (e) {
+        console.error('Backend proxy request failed:', e);
+        // fall through to direct call if possible
+      }
     }
+
+    if (!isAnthropicKeyConfigured()) {
+      return { reply: "CareGuide is not configured with an Anthropic API key. Please set ANTHROPIC_API_KEY in background.js or configure BACKEND_URL." };
+    }
+
+    console.warn('Calling Anthropic directly from the extension. This exposes your API key to client-side contexts. For production, use BACKEND_URL proxy.');
 
     const response = await fetch(CLAUDE_API_ENDPOINT, {
       method: "POST",
@@ -231,6 +257,33 @@ async function handleCaregiverSummary({ pageText, portalName }) {
       return { summary: "CareGuide is not configured with an Anthropic API key. Please set ANTHROPIC_API_KEY in background.js." };
     }
 
+    // Prefer backend proxy for summarization as well
+    if (BACKEND_URL && !BACKEND_URL.includes('your-careguide-backend.com')) {
+      try {
+        const proxyResp = await fetch(`${BACKEND_URL.replace(/\/+$/,'')}/caregiver-summary`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ portalName, pageText }),
+        });
+        if (!proxyResp.ok) {
+          const txt = await proxyResp.text().catch(() => '');
+          console.error('Backend proxy error', proxyResp.status, txt);
+          return { summary: `Backend proxy error ${proxyResp.status} ${txt}` };
+        }
+        const proxyData = await proxyResp.json().catch(() => null);
+        return { summary: proxyData?.summary || proxyData?.text || 'No summary from backend proxy.' };
+      } catch (e) {
+        console.error('Backend proxy request failed:', e);
+        // fall through to direct call if possible
+      }
+    }
+
+    if (!isAnthropicKeyConfigured()) {
+      return { summary: "CareGuide is not configured with an Anthropic API key. Please set ANTHROPIC_API_KEY in background.js or configure BACKEND_URL." };
+    }
+
+    console.warn('Calling Anthropic directly from the extension. This exposes your API key to client-side contexts. For production, use BACKEND_URL proxy.');
+
     const response = await fetch(CLAUDE_API_ENDPOINT, {
       method: "POST",
       headers: getAnthropicHeaders(),
@@ -240,7 +293,7 @@ async function handleCaregiverSummary({ pageText, portalName }) {
         system: `You summarize patient portal pages for caregivers of elderly patients. 
 Write in plain, warm language. Focus on: upcoming appointments, new test results, 
 medication changes, and any action items. Keep it under 150 words. 
-Start with "Here's a summary of [patient's] portal as of today:"`,
+Start with "Here's a summary of [patient's] portal as of today:",`,
         messages: [{
           role: "user",
           content: `Portal: ${portalName}\n\nPage content:\n${pageText}`,

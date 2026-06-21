@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Immunizations</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="health">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; <a href="health-summary.html">Health Summary</a> &rsaquo; Immunizations</div>
+        <h1>Immunization Record</h1>
+
+        <div class="card col-12">
+          <table class="results">
+            <thead><tr><th>Vaccine</th><th>Date Given</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Influenza (flu)</td><td>Oct 12, 2025</td><td><span class="badge ok">Up to date</span></td></tr>
+              <tr><td>Shingles (Shingrix) — dose 2</td><td>Apr 3, 2024</td><td><span class="badge ok">Complete</span></td></tr>
+              <tr><td>Shingles (Shingrix) — dose 1</td><td>Jan 5, 2024</td><td><span class="badge ok">Complete</span></td></tr>
+              <tr><td>Tdap (Tetanus/Diphtheria/Pertussis)</td><td>Jun 8, 2019</td><td><span class="badge ok">Up to date</span></td></tr>
+              <tr><td>Pneumococcal (pneumonia)</td><td>—</td><td><span class="badge warn">Overdue</span></td></tr>
+              <tr><td>COVID-19 (most recent)</td><td>Sep 30, 2024</td><td><span class="badge ok">Up to date</span></td></tr>
+            </tbody>
+          </table>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="schedule.html">Schedule a vaccine</a>
+            <button class="btn" data-act="Immunization record downloaded (PDF).">Download record</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="portal.js"></script>
+</body>
+</html>

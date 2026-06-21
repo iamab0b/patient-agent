@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Test Results</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="results">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; Test Results</div>
+        <h1>Test Results</h1>
+        <div class="note">Note: You may see results here before your provider has had a chance to review them.</div>
+
+        <label class="field" style="max-width:340px">Search test results
+          <input type="search" placeholder="Search by test name">
+        </label>
+
+        <h3 style="margin-top:8px">Individual Results</h3>
+
+        <a class="row-item" href="test-detail.html?t=lipid" style="text-decoration:none;color:inherit">
+          <div>
+            <h4>Lipid Profile <span class="badge new">New</span></h4>
+            <div class="meta">Lab &middot; June 15, 2026 &middot; Ordered by Sarah Chen, MD &middot; Message from Care Team</div>
+          </div>
+          <span class="btn btn-ghost">View</span>
+        </a>
+
+        <a class="row-item" href="test-detail.html?t=a1c" style="text-decoration:none;color:inherit">
+          <div>
+            <h4>Hemoglobin A1c (3-Month Average Sugar) <span class="badge new">New</span></h4>
+            <div class="meta">Lab &middot; June 15, 2026 &middot; Ordered by Sarah Chen, MD</div>
+          </div>
+          <span class="btn btn-ghost">View</span>
+        </a>
+
+        <a class="row-item" href="test-detail.html?t=cmp" style="text-decoration:none;color:inherit">
+          <div>
+            <h4>Comprehensive Metabolic Panel</h4>
+            <div class="meta">Lab &middot; June 15, 2026 &middot; Ordered by Sarah Chen, MD &middot; Message from Care Team</div>
+          </div>
+          <span class="btn btn-ghost">View</span>
+        </a>
+
+        <a class="row-item" href="test-detail.html?t=cbc" style="text-decoration:none;color:inherit">
+          <div>
+            <h4>Complete Blood Count (CBC)</h4>
+            <div class="meta">Lab &middot; June 15, 2026 &middot; Ordered by Sarah Chen, MD</div>
+          </div>
+          <span class="btn btn-ghost">View</span>
+        </a>
+
+        <a class="row-item" href="test-detail.html?t=lipid-2025" style="text-decoration:none;color:inherit">
+          <div>
+            <h4>Lipid Profile</h4>
+            <div class="meta">Lab &middot; December 10, 2025 &middot; Ordered by Sarah Chen, MD</div>
+          </div>
+          <span class="btn btn-ghost">View</span>
+        </a>
+
+        <a class="row-item" href="test-detail.html?t=tsh" style="text-decoration:none;color:inherit">
+          <div>
+            <h4>Thyroid Screen (TSH)</h4>
+            <div class="meta">Lab &middot; December 10, 2025 &middot; Ordered by Sarah Chen, MD</div>
+          </div>
+          <span class="btn btn-ghost">View</span>
+        </a>
+
+        <div class="btn-row"><button class="btn" data-act="All of your test results are now shown.">Load more results</button></div>
+        <p class="disclaimer">Showing 6 of many. Results are for information only — contact your clinician for medical advice.</p>
+      </div>
+    </main>
+  </div>
+  <script src="portal.js"></script>
+</body>
+</html>

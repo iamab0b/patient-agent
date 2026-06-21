@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Provider</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="care">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; <a href="care-team.html">Care Team</a> &rsaquo; <span id="bc-name">Provider</span></div>
+        <h1 id="p-name">Provider</h1>
+        <p class="muted" id="p-spec">Specialty</p>
+
+        <div class="card col-12">
+          <p id="p-bio"></p>
+          <p><span class="muted">Location:</span> <b id="p-loc"></b></p>
+          <p><span class="muted">Phone:</span> <b id="p-phone"></b></p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="schedule.html">Schedule with this provider</a>
+            <a class="btn" href="compose-message.html">Send a message</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="portal.js"></script>
+  <script>
+    var DATA = {
+      chen:   {name:"Sarah Chen, MD", spec:"Internal Medicine — Primary Care Provider", bio:"Dr. Chen has cared for adults in Springfield for 15 years, with a focus on diabetes and heart health.", loc:"Internal Medicine - Springfield, 100 Center St", phone:"(555) 555-0100"},
+      patel:  {name:"Raymond Patel, MD", spec:"Cardiology", bio:"Dr. Patel is a cardiologist who manages blood pressure, cholesterol, and heart conditions.", loc:"Springfield Cardiology, 220 Elm St", phone:"(555) 555-0144"},
+      okafor: {name:"James Okafor, MD", spec:"Endocrinology", bio:"Dr. Okafor specializes in diabetes, thyroid, and hormone conditions.", loc:"Endocrinology - Springfield, 100 Center St", phone:"(555) 555-0177"},
+      lopez:  {name:"Maria Lopez, NP", spec:"Primary Care — Nurse Practitioner", bio:"Maria Lopez, NP partners with Dr. Chen on routine and preventive care.", loc:"Internal Medicine - Springfield, 100 Center St", phone:"(555) 555-0100"}
+    };
+    var key = (new URLSearchParams(location.search).get('p')) || 'chen';
+    var d = DATA[key] || DATA.chen;
+    document.getElementById('bc-name').textContent = d.name;
+    document.getElementById('p-name').textContent = d.name;
+    document.getElementById('p-spec').textContent = d.spec;
+    document.getElementById('p-bio').textContent = d.bio;
+    document.getElementById('p-loc').textContent = d.loc;
+    document.getElementById('p-phone').textContent = d.phone;
+    document.title = 'MyHealth Online — ' + d.name;
+  </script>
+</body>
+</html>

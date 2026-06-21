@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Medications</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="medications">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; Medications</div>
+        <h1>Medications</h1>
+
+        <!-- Step 1: Current medications -->
+        <section id="step1">
+          <div class="stepper">
+            <div class="step active">1. Current Medications</div>
+            <div class="step">2. Pharmacy</div>
+            <div class="step">3. Review Your Request</div>
+          </div>
+          <div class="note">To renew a prescription, check the boxes next to the medicines you need and
+            choose <b>Request Renewal</b>. Some refills must be requested directly from your pharmacy.</div>
+
+          <div class="row-item">
+            <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer">
+              <input type="checkbox" class="med-check" data-name="Metformin 500 mg Tablet" style="margin-top:5px">
+              <span>
+                <h4>Metformin 500 mg Tablet <span class="badge ok" data-flag-when="renewal:Metformin 500 mg Tablet">Renewal requested ✓</span></h4>
+                <div class="meta">Take one tablet by mouth twice daily with meals.<br>
+                  Prescribed by Sarah Chen, MD &middot; Qty 60 &middot; Refills: renew through portal</div>
+              </span>
+            </label>
+          </div>
+
+          <div class="row-item">
+            <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer">
+              <input type="checkbox" class="med-check" data-name="Lisinopril 10 mg Tablet" style="margin-top:5px">
+              <span>
+                <h4>Lisinopril 10 mg Tablet <span class="badge ok" data-flag-when="renewal:Lisinopril 10 mg Tablet">Renewal requested ✓</span></h4>
+                <div class="meta">Take one tablet by mouth once daily in the morning.<br>
+                  Prescribed by Sarah Chen, MD &middot; Qty 30 &middot; Refills: renew through portal</div>
+              </span>
+            </label>
+          </div>
+
+          <div class="row-item">
+            <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer">
+              <input type="checkbox" class="med-check" data-name="Atorvastatin 20 mg Tablet" style="margin-top:5px">
+              <span>
+                <h4>Atorvastatin 20 mg Tablet <span class="badge ok" data-flag-when="renewal:Atorvastatin 20 mg Tablet">Renewal requested ✓</span></h4>
+                <div class="meta">Take one tablet by mouth at bedtime.<br>
+                  Prescribed by Sarah Chen, MD &middot; Qty 30 &middot; Refills: renew through portal</div>
+              </span>
+            </label>
+          </div>
+
+          <div class="row-item">
+            <div>
+              <h4>Aspirin 81 mg Tablet <span class="badge muted">Over the counter</span></h4>
+              <div class="meta">Take one tablet by mouth daily. Documented by Maria Lopez, NP.<br>
+                This prescription cannot be renewed through MyHealth Online.</div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="goStep(2)">Request Renewal</button>
+          </div>
+        </section>
+
+        <!-- Step 2: Pharmacy -->
+        <section id="step2" style="display:none">
+          <div class="stepper">
+            <div class="step done">1. Current Medications</div>
+            <div class="step active">2. Pharmacy</div>
+            <div class="step">3. Review Your Request</div>
+          </div>
+          <h3>Choose a pharmacy</h3>
+          <button class="choice selected" onclick="selectPharmacy(this)">
+            <div class="t">CVS Pharmacy #1742</div>
+            <div class="d">1450 Main St, Springfield &middot; (555) 771-1617</div>
+          </button>
+          <button class="choice" onclick="selectPharmacy(this)">
+            <div class="t">Walgreens #5521</div>
+            <div class="d">88 Oak Avenue, Springfield &middot; (555) 442-3380</div>
+          </button>
+          <label class="field" style="margin-top:8px">Comments for your pharmacy (optional)
+            <textarea rows="2" placeholder="e.g. I am running low and have 3 days left"></textarea>
+          </label>
+          <div class="btn-row">
+            <button class="btn" onclick="goStep(1)">Back</button>
+            <button class="btn btn-primary" onclick="goStep(3)">Next</button>
+          </div>
+        </section>
+
+        <!-- Step 3: Review -->
+        <section id="step3" style="display:none">
+          <div class="stepper">
+            <div class="step done">1. Current Medications</div>
+            <div class="step done">2. Pharmacy</div>
+            <div class="step active">3. Review Your Request</div>
+          </div>
+          <h3>Review your request</h3>
+          <div class="card col-12">
+            <p><span class="muted">Medications to renew:</span></p>
+            <ul id="review-meds"><li class="muted">No medications selected.</li></ul>
+            <p><span class="muted">Pharmacy:</span> <b id="review-pharmacy">CVS Pharmacy #1742</b></p>
+          </div>
+          <label class="field" style="margin-top:12px">
+            <input type="checkbox" id="confirm-correct" style="width:auto;display:inline;margin-right:8px">
+            This information is correct.
+          </label>
+          <div class="btn-row">
+            <button class="btn" onclick="goStep(2)">Back</button>
+            <button class="btn btn-primary" onclick="submitRenewal()">Submit Request</button>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="portal.js"></script>
+  <script>
+    var selectedPharmacy = "CVS Pharmacy #1742";
+    function goStep(n){
+      for (var i=1;i<=3;i++) document.getElementById('step'+i).style.display = (i===n)?'':'none';
+      if (n===3) buildReview();
+      window.scrollTo(0,0);
+    }
+    function selectPharmacy(btn){
+      document.querySelectorAll('#step2 .choice').forEach(function(c){c.classList.remove('selected');});
+      btn.classList.add('selected');
+      selectedPharmacy = btn.querySelector('.t').textContent;
+    }
+    function buildReview(){
+      var checked = Array.prototype.filter.call(document.querySelectorAll('.med-check'), function(c){return c.checked;});
+      var list = document.getElementById('review-meds');
+      if (checked.length===0){ list.innerHTML = '<li class="muted">No medications selected.</li>'; }
+      else { list.innerHTML = checked.map(function(c){return '<li>'+c.dataset.name+'</li>';}).join(''); }
+      document.getElementById('review-pharmacy').textContent = selectedPharmacy;
+    }
+    function submitRenewal(){
+      if (!document.getElementById('confirm-correct').checked){ alert('Please confirm the information is correct.'); return; }
+      var checked = Array.prototype.filter.call(document.querySelectorAll('.med-check'), function(c){return c.checked;});
+      if (checked.length === 0){ alert('Please select at least one medication on Step 1.'); goStep(1); return; }
+      checked.forEach(function(c){ Portal.setFlag('renewal:' + c.dataset.name, true); });
+      Portal.notify('Renewal requested for ' + checked.length + ' medication(s), sent to ' + selectedPharmacy + '.');
+      // Reflect the new badges and reset the form.
+      checked.forEach(function(c){ c.checked = false; });
+      document.querySelectorAll('[data-flag-when]').forEach(function(el){
+        if (Portal.flag(el.getAttribute('data-flag-when'))) el.style.display = '';
+      });
+      document.getElementById('confirm-correct').checked = false;
+      goStep(1);
+    }
+  </script>
+</body>
+</html>

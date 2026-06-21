@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — eCheck-in</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="appointments">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; <a href="appointments.html">Appointments</a> &rsaquo; eCheck-in</div>
+        <h1>eCheck-in</h1>
+        <p class="muted">Office Visit — Sarah Chen, MD &middot; June 25, 2026 &middot; 2:30 PM &middot; Video Visit</p>
+
+        <div class="stepper">
+          <div class="step active" data-step="1">1. Personal Info</div>
+          <div class="step" data-step="2">2. Insurance</div>
+          <div class="step" data-step="3">3. Pharmacy</div>
+          <div class="step" data-step="4">4. Sign &amp; Submit</div>
+        </div>
+
+        <section id="e1">
+          <h3>Confirm your personal information</h3>
+          <label class="field">Address<input type="text" value="42 Maple Street, Springfield"></label>
+          <label class="field">Mobile phone<input type="tel" value="(555) 588-9900"></label>
+          <label class="field">Emergency contact<input type="text" value="Mary Smith — (555) 588-9901"></label>
+          <div class="btn-row"><button class="btn btn-primary" onclick="go(2)">Looks correct, continue</button></div>
+        </section>
+
+        <section id="e2" style="display:none">
+          <h3>Confirm your insurance</h3>
+          <div class="card col-12">
+            <p><span class="muted">Plan:</span> <b>Medicare Part B</b></p>
+            <p><span class="muted">Member ID:</span> <b>1EG4-TE5-MK72</b></p>
+            <p><span class="muted">Secondary:</span> <b>Springfield Senior Supplement</b></p>
+          </div>
+          <label class="field" style="margin-top:10px"><input type="checkbox" checked style="width:auto;display:inline;margin-right:8px">This insurance information is correct</label>
+          <div class="btn-row">
+            <button class="btn" onclick="go(1)">Back</button>
+            <button class="btn btn-primary" onclick="go(3)">Continue</button>
+          </div>
+        </section>
+
+        <section id="e3" style="display:none">
+          <h3>Confirm your pharmacy</h3>
+          <button class="choice selected" onclick="selPharm(this)"><div class="t">CVS Pharmacy #1742</div><div class="d">1450 Main St, Springfield</div></button>
+          <button class="choice" onclick="selPharm(this)"><div class="t">Walgreens #5521</div><div class="d">88 Oak Avenue, Springfield</div></button>
+          <div class="btn-row">
+            <button class="btn" onclick="go(2)">Back</button>
+            <button class="btn btn-primary" onclick="go(4)">Continue</button>
+          </div>
+        </section>
+
+        <section id="e4" style="display:none">
+          <h3>Review &amp; sign</h3>
+          <div class="note">By signing, you confirm the information above is correct and consent to treatment for this visit.</div>
+          <label class="field">Type your full name to sign<input type="text" id="sig" placeholder="John Smith"></label>
+          <div class="btn-row">
+            <button class="btn" onclick="go(3)">Back</button>
+            <button class="btn btn-primary" onclick="finish()">Complete check-in</button>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="portal.js"></script>
+  <script>
+    function go(n){
+      ['1','2','3','4'].forEach(function(i){ document.getElementById('e'+i).style.display=(i==n)?'':'none'; });
+      document.querySelectorAll('.stepper .step').forEach(function(s){
+        var d=+s.dataset.step; s.classList.toggle('active',d===n); s.classList.toggle('done',d<n);
+      });
+      window.scrollTo(0,0);
+    }
+    function selPharm(btn){ document.querySelectorAll('#e3 .choice').forEach(function(c){c.classList.remove('selected');}); btn.classList.add('selected'); }
+    function finish(){
+      if (!document.getElementById('sig').value.trim()){ alert('Please type your name to sign.'); return; }
+      Portal.setFlag('appt:chen:checkedin', true);
+      Portal.notify('eCheck-in complete for your June 25 visit with Dr. Chen.');
+      location.href = 'appointments.html';
+    }
+  </script>
+</body>
+</html>

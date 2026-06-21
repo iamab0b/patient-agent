@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Home</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="home">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <h1>Welcome, John!</h1>
+        <p class="muted">Here is everything in your health record. Choose a section to get started.</p>
+
+        <!-- Labeled button-cells: every page is reachable from here -->
+        <div class="tiles">
+          <a class="tile" href="test-results.html">
+            <div class="ico">&#128202;</div>
+            <div class="label">Test Results</div>
+            <div class="desc">View your lab and test results</div>
+          </a>
+          <a class="tile" href="medications.html">
+            <div class="ico">&#128138;</div>
+            <div class="label">Medications</div>
+            <div class="desc">See your medicines and request renewals</div>
+          </a>
+          <a class="tile" href="appointments.html">
+            <div class="ico">&#128197;</div>
+            <div class="label">Appointments &amp; Visits</div>
+            <div class="desc">Upcoming appointments and past visits</div>
+          </a>
+          <a class="tile" href="schedule.html">
+            <div class="ico">&#10133;</div>
+            <div class="label">Schedule an Appointment</div>
+            <div class="desc">Book a new visit with your care team</div>
+          </a>
+          <a class="tile" href="health-summary.html">
+            <div class="ico">&#128203;</div>
+            <div class="label">Health Summary</div>
+            <div class="desc">Problems, allergies, immunizations</div>
+          </a>
+          <a class="tile" href="messages.html">
+            <div class="ico">&#9993;</div>
+            <div class="label">Messages</div>
+            <div class="desc">Messages from your care team</div>
+          </a>
+          <a class="tile" href="billing.html">
+            <div class="ico">&#128179;</div>
+            <div class="label">Billing &amp; Payments</div>
+            <div class="desc">View and pay your bill</div>
+          </a>
+          <a class="tile" href="care-team.html">
+            <div class="ico">&#128104;&#8205;&#9877;&#65039;</div>
+            <div class="label">Care Team</div>
+            <div class="desc">Your providers and referrals</div>
+          </a>
+          <a class="tile" href="documents.html">
+            <div class="ico">&#128193;</div>
+            <div class="label">Documents &amp; Forms</div>
+            <div class="desc">Letters, records, questionnaires</div>
+          </a>
+          <a class="tile" href="profile.html">
+            <div class="ico">&#9881;&#65039;</div>
+            <div class="label">Account &amp; Settings</div>
+            <div class="desc">Personal info and preferences</div>
+          </a>
+        </div>
+
+        <div class="grid" style="margin-top:22px">
+          <!-- Updates / reminders -->
+          <div class="card col-8">
+            <div class="section-title"><h3>Your Updates</h3></div>
+
+            <div class="message">
+              <strong>New message from Dr. Sarah Chen</strong>
+              <div class="muted" style="font-size:13px">Jun 19, 2026</div>
+              <p style="margin:6px 0">Your HbA1c came back at 7.2%. Let's discuss a small medication
+                adjustment — please schedule a follow-up. <a href="messages.html">Read message</a></p>
+            </div>
+
+            <div class="row-item">
+              <div>
+                <h4>Upcoming Appointment</h4>
+                <div class="meta">Dr. Sarah Chen — Internal Medicine · June 25, 2026 · 2:30 PM · Video Visit</div>
+              </div>
+              <a class="btn btn-ghost" href="appointments.html">View</a>
+            </div>
+
+            <div class="row-item">
+              <div>
+                <h4>Health Reminders (3)</h4>
+                <div class="meta">Flu shot due · Diabetic eye exam due · Pneumonia vaccine overdue</div>
+              </div>
+              <a class="btn btn-ghost" href="health-summary.html">View all</a>
+            </div>
+          </div>
+
+          <!-- Care team -->
+          <div class="card col-4">
+            <div class="section-title"><h3>Care Team</h3><a href="care-team.html">View all</a></div>
+            <p style="margin:4px 0"><a href="provider-detail.html?p=chen"><b>Sarah Chen, MD</b></a><br><span class="muted">Internal Medicine (PCP)</span></p>
+            <p style="margin:4px 0"><a href="provider-detail.html?p=patel"><b>Raymond Patel, MD</b></a><br><span class="muted">Cardiology</span></p>
+            <p style="margin:4px 0"><a href="provider-detail.html?p=okafor"><b>James Okafor, MD</b></a><br><span class="muted">Endocrinology</span></p>
+            <p style="margin:4px 0"><a href="provider-detail.html?p=lopez"><b>Maria Lopez, NP</b></a><br><span class="muted">Primary Care</span></p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="portal.js"></script>
+</body>
+</html>

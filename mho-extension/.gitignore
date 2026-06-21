@@ -1,0 +1,34 @@
+# API keys and secrets
+.env
+*.env
+config.js
+secrets.js
+
+# Never commit these if you add them
+background.local.js
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor folders
+.vscode/
+.idea/
+
+# Node (if you add a build step later)
+node_modules/
+package-lock.json
+dist/
+build/
+
+# Python backend (if added to same repo)
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.egg-info/
+
+# Zip builds
+*.zip
+background.js 
