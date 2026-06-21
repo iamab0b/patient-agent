@@ -3,20 +3,19 @@
 
 console.log("CareGuide background worker starting");
 const BACKEND_URL = "https://your-careguide-backend.com"; // swap with your Cloud Run URL
-const ANTHROPIC_API_KEY = "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";
+const ANTHROPIC_API_KEY = "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";
 const CLAUDE_API_ENDPOINT = "https://api.anthropic.com/v1/messages";
 
+// When calling from browser contexts, Anthropic requires an explicit header
+// acknowledging direct-browser access. This is unsafe for production; prefer
+// routing requests through a backend proxy so API keys are not exposed.
 function getAnthropicHeaders() {
-  const headers = {
+  return {
     "Content-Type": "application/json",
-    "x-api-key": "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",
+    "x-api-key": ANTHROPIC_API_KEY,
     "anthropic-version": "2023-06-01",
+    "anthropic-dangerous-direct-browser-access": "true",
   };
-  // When calling from browser contexts, Anthropic requires an explicit header
-  // acknowledging direct-browser access. This is unsafe for production; prefer
-  // routing requests through a backend proxy so API keys are not exposed.
-  headers["anthropic-dangerous-direct-browser-access"] = "true";
-  return headers;
 }
 
 function isAnthropicKeyConfigured() {
@@ -59,6 +58,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           sendResponse({ reply: `Error processing request: ${err?.message || err}` });
         });
       return true; // keep channel open for async response
+    }
+
+    if (message?.type === "EXPLAIN_TERM") {
+      handleExplainTerm(message.payload)
+        .then((res) => sendResponse(res))
+        .catch((err) => {
+          console.error("handleExplainTerm error:", err);
+          sendResponse({ reply: `Error processing request: ${err?.message || err}` });
+        });
+      return true;
     }
 
     if (message?.type === "CAREGIVER_SUMMARY") {
@@ -161,6 +170,81 @@ Your rules:
     return { reply };
   } catch (err) {
     console.error("Claude API error:", err);
+    return { reply: `Connection error: ${err?.message || err}` };
+  }
+}
+
+// ── Medical Term Explanation (hover/select "?" button) ──────────────────────
+async function handleExplainTerm({ term, context, language, portalName }) {
+  try {
+    console.log("handleExplainTerm payload:", { term, context, language, portalName });
+
+    if (!isAnthropicKeyConfigured()) {
+      return { reply: "CareGuide is not configured with an Anthropic API key. Please set ANTHROPIC_API_KEY in background.js." };
+    }
+
+    const systemPrompt = `You are CareGuide, a health assistant that explains patient portal content
+(${portalName}) to patients with no medical background, in plain language.
+
+Write your ENTIRE response in ${language} — every word, including all section headers. Do not include
+any English unless the user's language is English.
+
+Be SHORT and FAST. Hard limit: 60-100 words total. Use short bullet points, not paragraphs. Skip
+background details that aren't essential. Only include a section if it is relevant.
+
+Structure (using **bold** for headers, translated into ${language}; omit any section that doesn't apply):
+
+**<Translated name of the term>**
+
+**<header meaning "What it means">**
+- 1 short bullet, plain language
+
+**<header meaning "Why it matters">**
+- 1 short bullet
+
+**<header meaning "Normal range">** (ONLY if this is a lab result or vital sign with numeric ranges)
+- short bullet(s) with the ranges
+
+**<header meaning "What to watch for">** (ONLY if relevant symptoms/warning signs exist)
+- short bullet(s)
+
+Rules:
+- Adapt to the item type: diagnosis, medication, lab result, or vital sign.
+- Never give personalized medical advice — general education only.
+- Reassuring tone, never alarming.
+- Output ONLY the formatted explanation text. No preamble, no JSON, no code fences.`;
+
+    const userMessage = context
+      ? `Selected medical term/content: "${term}"\n\nSurrounding context from the page: "${context}"`
+      : `Selected medical term/content: "${term}"`;
+
+    const response = await fetch(CLAUDE_API_ENDPOINT, {
+      method: "POST",
+      headers: getAnthropicHeaders(),
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 280,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userMessage }],
+      }),
+    });
+
+    if (!response.ok) {
+      const txt = await response.text().catch(() => "");
+      console.error("Explain term API non-OK response", response.status, response.statusText, txt);
+      return { reply: `Claude API error ${response.status}${txt ? ` ${txt}` : ""}` };
+    }
+
+    const data = await response.json().catch((e) => {
+      console.error("Error parsing explain-term JSON:", e);
+      return null;
+    });
+
+    let reply = data?.content?.[0]?.text || data?.completion?.[0]?.data?.text || data?.message || null;
+    reply = reply || "I couldn't generate an explanation. Please try again.";
+    return { reply };
+  } catch (err) {
+    console.error("handleExplainTerm error:", err);
     return { reply: `Connection error: ${err?.message || err}` };
   }
 }
