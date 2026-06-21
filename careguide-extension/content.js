@@ -535,17 +535,25 @@ function minimizeSidebar() {
     rb.textContent = '🩺';
     Object.assign(rb.style, {
       position: 'fixed',
-      right: '20px',
-      bottom: '20px',
-      width: '48px',
-      height: '48px',
-      borderRadius: '24px',
+      right: '0px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      width: '42px',
+      height: '120px',
+      padding: '8px 6px',
+      borderRadius: '8px 0 0 8px',
       border: 'none',
       background: '#2563eb',
       color: '#fff',
       zIndex: 999999,
       cursor: 'pointer',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      writingMode: 'vertical-rl',
+      textOrientation: 'mixed',
+      fontWeight: '700'
     });
     rb.addEventListener('click', () => restoreSidebar());
     document.body.appendChild(rb);
