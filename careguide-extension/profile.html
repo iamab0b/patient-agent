@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Account &amp; Profile</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="profile">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; Account &amp; Profile</div>
+        <h1>Account &amp; Profile</h1>
+
+        <div class="grid">
+          <div class="card col-6">
+            <h3>Personal Information</h3>
+            <label class="field">Preferred name<input type="text" value="John"></label>
+            <label class="field">Mobile phone<input type="tel" value="(555) 588-9900"></label>
+            <label class="field">Email<input type="email" value="john.smith@example.com"></label>
+            <label class="field">Mailing address<input type="text" value="42 Maple Street, Springfield"></label>
+            <button class="btn btn-primary" data-act="Personal information saved.">Save changes</button>
+          </div>
+
+          <div class="card col-6">
+            <h3>Communication Preferences</h3>
+            <label class="field"><input type="checkbox" checked style="width:auto;display:inline;margin-right:8px">Email notifications</label>
+            <label class="field"><input type="checkbox" checked style="width:auto;display:inline;margin-right:8px">Text message reminders</label>
+            <label class="field"><input type="checkbox" style="width:auto;display:inline;margin-right:8px">Paper mail</label>
+            <button class="btn btn-primary" data-act="Communication preferences saved.">Save preferences</button>
+
+            <h3 style="margin-top:22px">Language</h3>
+            <label class="field">Preferred language
+              <select>
+                <option>English</option>
+                <option>Español (Spanish)</option>
+                <option>中文 (Chinese)</option>
+                <option>Tiếng Việt (Vietnamese)</option>
+              </select>
+            </label>
+            <button class="btn btn-primary" data-act="Language preference updated.">Update language</button>
+          </div>
+
+          <div class="card col-12">
+            <h3>Account Settings</h3>
+            <div class="btn-row">
+              <button class="btn" data-act="A password-change link was sent to your email.">Change password</button>
+              <a class="btn" href="care-team.html">Manage care team</a>
+              <button class="btn" data-act="Demo: you have been signed out." data-goto="demo-portal.html">Log out</button>
+            </div>
+          </div>
+
+          <div class="card col-12">
+            <h3>Demo Controls</h3>
+            <p class="muted">Clears all simulated demo state — notifications, refill requests, payments,
+              eCheck-in, and cancellations — back to the starting point.</p>
+            <button class="btn" id="reset-demo">Reset demo state</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="portal.js"></script>
+  <script>
+    document.getElementById('reset-demo').addEventListener('click', function(){
+      if (confirm('Reset all demo state back to the starting point?')){
+        Portal.reset();
+        alert('Demo state reset.');
+        location.href = 'demo-portal.html';
+      }
+    });
+  </script>
+</body>
+</html>

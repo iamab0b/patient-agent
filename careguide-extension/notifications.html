@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Notifications</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="home">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; Notifications</div>
+        <div class="section-title">
+          <h1>Notifications</h1>
+          <div class="btn-row" style="margin:0">
+            <button class="btn" id="mark-read">Mark all as read</button>
+            <button class="btn" id="clear">Clear all</button>
+          </div>
+        </div>
+        <div id="inbox"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="portal.js"></script>
+  <script>
+    function render(){
+      var items = Portal.list();
+      var box = document.getElementById('inbox');
+      if (!items.length){ box.innerHTML = '<p class="muted">No notifications yet. Actions you take in the portal (refills, payments, messages) will appear here.</p>'; return; }
+      box.innerHTML = items.map(function(n){
+        return '<div class="notif '+(n.read?'read':'unread')+'"><span class="dot"></span>'+
+               '<div><div>'+n.text+'</div><div class="muted" style="font-size:13px">'+n.time+'</div></div></div>';
+      }).join('');
+    }
+    render();
+    document.getElementById('mark-read').addEventListener('click', function(){ Portal.markAllRead(); render(); });
+    document.getElementById('clear').addEventListener('click', function(){ Portal.clear(); render(); });
+    // Visiting the inbox marks everything read after a moment.
+    setTimeout(function(){ Portal.markAllRead(); render(); }, 1200);
+  </script>
+</body>
+</html>

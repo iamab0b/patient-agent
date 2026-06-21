@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Questionnaires</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="documents">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; <a href="documents.html">Documents</a> &rsaquo; Questionnaires</div>
+        <h1>Questionnaires &amp; Forms</h1>
+
+        <div id="list">
+          <div class="row-item">
+            <div><h4>Pre-Visit Health Check <span class="badge warn">Due</span></h4><div class="meta">For your June 25 appointment &middot; 3 questions</div></div>
+            <button class="btn btn-primary" onclick="openForm()">Start</button>
+          </div>
+          <div class="row-item">
+            <div><h4>Annual Wellness Questionnaire <span class="badge muted">Completed</span></h4><div class="meta">Submitted Mar 18, 2026</div></div>
+            <button class="btn" data-act="Your submitted Annual Wellness Questionnaire was opened.">View</button>
+          </div>
+        </div>
+
+        <form id="form" style="display:none" onsubmit="submitForm();return false;">
+          <div class="card col-12">
+            <h3>Pre-Visit Health Check</h3>
+            <label class="field">How have you been feeling since your last visit?
+              <select><option>About the same</option><option>Better</option><option>Worse</option></select>
+            </label>
+            <label class="field">Are you having any new symptoms?
+              <textarea rows="2" placeholder="Describe any new symptoms, or write 'none'"></textarea>
+            </label>
+            <label class="field">Have you taken all medications as prescribed?
+              <select><option>Yes</option><option>Most of the time</option><option>No</option></select>
+            </label>
+            <div class="btn-row">
+              <button type="button" class="btn" onclick="closeForm()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="portal.js"></script>
+  <script>
+    function openForm(){ document.getElementById('list').style.display='none'; document.getElementById('form').style.display=''; window.scrollTo(0,0); }
+    function closeForm(){ document.getElementById('form').style.display='none'; document.getElementById('list').style.display=''; }
+    function submitForm(){ Portal.notify('Pre-Visit Health Check submitted. Thank you!'); location.href='demo-portal.html'; }
+  </script>
+</body>
+</html>

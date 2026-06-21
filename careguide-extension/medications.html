@@ -27,7 +27,7 @@
             <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer">
               <input type="checkbox" class="med-check" data-name="Metformin 500 mg Tablet" style="margin-top:5px">
               <span>
-                <h4>Metformin 500 mg Tablet</h4>
+                <h4>Metformin 500 mg Tablet <span class="badge ok" data-flag-when="renewal:Metformin 500 mg Tablet">Renewal requested ✓</span></h4>
                 <div class="meta">Take one tablet by mouth twice daily with meals.<br>
                   Prescribed by Sarah Chen, MD &middot; Qty 60 &middot; Refills: renew through portal</div>
               </span>
@@ -38,7 +38,7 @@
             <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer">
               <input type="checkbox" class="med-check" data-name="Lisinopril 10 mg Tablet" style="margin-top:5px">
               <span>
-                <h4>Lisinopril 10 mg Tablet</h4>
+                <h4>Lisinopril 10 mg Tablet <span class="badge ok" data-flag-when="renewal:Lisinopril 10 mg Tablet">Renewal requested ✓</span></h4>
                 <div class="meta">Take one tablet by mouth once daily in the morning.<br>
                   Prescribed by Sarah Chen, MD &middot; Qty 30 &middot; Refills: renew through portal</div>
               </span>
@@ -49,7 +49,7 @@
             <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer">
               <input type="checkbox" class="med-check" data-name="Atorvastatin 20 mg Tablet" style="margin-top:5px">
               <span>
-                <h4>Atorvastatin 20 mg Tablet</h4>
+                <h4>Atorvastatin 20 mg Tablet <span class="badge ok" data-flag-when="renewal:Atorvastatin 20 mg Tablet">Renewal requested ✓</span></h4>
                 <div class="meta">Take one tablet by mouth at bedtime.<br>
                   Prescribed by Sarah Chen, MD &middot; Qty 30 &middot; Refills: renew through portal</div>
               </span>
@@ -142,7 +142,16 @@
     }
     function submitRenewal(){
       if (!document.getElementById('confirm-correct').checked){ alert('Please confirm the information is correct.'); return; }
-      alert('Demo: your renewal request has been sent to ' + selectedPharmacy + '.');
+      var checked = Array.prototype.filter.call(document.querySelectorAll('.med-check'), function(c){return c.checked;});
+      if (checked.length === 0){ alert('Please select at least one medication on Step 1.'); goStep(1); return; }
+      checked.forEach(function(c){ Portal.setFlag('renewal:' + c.dataset.name, true); });
+      Portal.notify('Renewal requested for ' + checked.length + ' medication(s), sent to ' + selectedPharmacy + '.');
+      // Reflect the new badges and reset the form.
+      checked.forEach(function(c){ c.checked = false; });
+      document.querySelectorAll('[data-flag-when]').forEach(function(el){
+        if (Portal.flag(el.getAttribute('data-flag-when'))) el.style.display = '';
+      });
+      document.getElementById('confirm-correct').checked = false;
       goStep(1);
     }
   </script>

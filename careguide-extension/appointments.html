@@ -27,13 +27,13 @@
 
           <div class="row-item">
             <div>
-              <h4>Office Visit — Sarah Chen, MD</h4>
+              <h4>Office Visit — Sarah Chen, MD <span class="badge ok" data-flag-when="appt:chen:checkedin">Checked in ✓</span></h4>
               <div class="meta">Internal Medicine &middot; June 25, 2026 &middot; 2:30 PM &middot; <b>Video Visit</b></div>
               <div class="btn-row">
-                <button class="btn btn-primary" data-demo-action="Demo: eCheck-in would start here.">eCheck-in</button>
-                <button class="btn" data-demo-action="Demo: join the video visit.">Join video visit</button>
-                <button class="btn" data-demo-action="Demo: reschedule flow.">Reschedule</button>
-                <button class="btn" data-demo-action="Demo: cancel this appointment.">Cancel</button>
+                <a class="btn btn-primary" href="echeckin.html" data-flag-unless="appt:chen:checkedin">eCheck-in</a>
+                <button class="btn" data-act="Joining your video visit with Dr. Chen…">Join video visit</button>
+                <a class="btn" href="schedule.html">Reschedule</a>
+                <button class="btn" data-act="Your appointment with Dr. Chen was cancelled." data-flag="appt:chen:cancelled" data-done="Cancelled">Cancel</button>
               </div>
             </div>
           </div>
@@ -43,8 +43,8 @@
               <h4>Cardiology Follow-up — Raymond Patel, MD</h4>
               <div class="meta">Cardiology &middot; July 10, 2026 &middot; 10:00 AM &middot; Springfield Cardiology, 220 Elm St</div>
               <div class="btn-row">
-                <button class="btn" data-demo-action="Demo: reschedule flow.">Reschedule</button>
-                <button class="btn" data-demo-action="Demo: cancel this appointment.">Cancel</button>
+                <a class="btn" href="schedule.html">Reschedule</a>
+                <button class="btn" data-act="Your appointment with Dr. Patel was cancelled." data-flag="appt:patel:cancelled" data-done="Cancelled">Cancel</button>
               </div>
             </div>
           </div>
@@ -96,7 +96,7 @@
             </div>
           </div>
 
-          <div class="btn-row"><button class="btn" data-demo-action="Demo: older visits would load here.">Load more past visits</button></div>
+          <div class="btn-row"><button class="btn" data-act="All of your past visits are now shown.">Load more past visits</button></div>
         </section>
       </div>
     </main>
