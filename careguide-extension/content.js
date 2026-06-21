@@ -502,7 +502,7 @@ function attachSidebarEvents() {
   });
   document.getElementById("cg-close")?.addEventListener("click", () => {
     console.log("close button clicked");
-    document.getElementById("careguide-sidebar")?.remove();
+    minimizeSidebar();
   });
   document.getElementById("cg-caregiver-btn")?.addEventListener("click", () => {
     console.log("caregiver summary clicked");
@@ -520,6 +520,51 @@ function attachSidebarEvents() {
       highlightElement(intent);
     });
   });
+}
+
+function minimizeSidebar() {
+  const sidebar = document.getElementById('careguide-sidebar');
+  if (!sidebar) return;
+  sidebar.classList.add('minimized');
+
+  // Add a small restore button if not present
+  if (!document.getElementById('cg-restore')) {
+    const rb = document.createElement('button');
+    rb.id = 'cg-restore';
+    rb.title = 'Open CareGuide';
+    rb.textContent = '🩺';
+    Object.assign(rb.style, {
+      position: 'fixed',
+      right: '0px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      width: '42px',
+      height: '120px',
+      padding: '8px 6px',
+      borderRadius: '8px 0 0 8px',
+      border: 'none',
+      background: '#2563eb',
+      color: '#fff',
+      zIndex: 999999,
+      cursor: 'pointer',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      writingMode: 'vertical-rl',
+      textOrientation: 'mixed',
+      fontWeight: '700'
+    });
+    rb.addEventListener('click', () => restoreSidebar());
+    document.body.appendChild(rb);
+  }
+}
+
+function restoreSidebar() {
+  const sidebar = document.getElementById('careguide-sidebar');
+  if (sidebar) sidebar.classList.remove('minimized');
+  const rb = document.getElementById('cg-restore');
+  if (rb) rb.remove();
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
