@@ -80,6 +80,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true;
     }
 
+    if (message?.type === "SEND_CAREGIVER_EMAIL") {
+      handleSendCaregiverEmail(message.payload)
+        .then((res) => sendResponse(res))
+        .catch((err) => {
+          console.error("handleSendCaregiverEmail error:", err);
+          sendResponse({ success: false, error: err?.message || "Could not send email." });
+        });
+      return true;
+    }
+
     console.warn("Unhandled background message type:", message?.type, message);
   } catch (e) {
     console.error("onMessage listener error:", e);
@@ -317,5 +327,41 @@ Start with "Here's a summary of [patient's] portal as of today:",`,
     return { summary };
   } catch (err) {
     return { summary: "Error generating summary. Please try again." };
+  }
+}
+
+// ── Send Caregiver Email ─────────────────────────────────────────────────────
+// Email credentials must live on the backend, never in the extension, so this
+// always routes through BACKEND_URL/send-email rather than sending directly.
+async function handleSendCaregiverEmail({ to, message }) {
+  if (!to || !message) {
+    return { success: false, error: "Missing caregiver email or message." };
+  }
+
+  if (!BACKEND_URL || BACKEND_URL.includes("your-careguide-backend.com")) {
+    return {
+      success: false,
+      error: "CareGuide's backend is not configured. Set BACKEND_URL in background.js to a server that can send email.",
+    };
+  }
+
+  try {
+    const resp = await fetch(`${BACKEND_URL.replace(/\/+$/, "")}/send-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ to, message }),
+    });
+
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => "");
+      console.error("send-email backend error", resp.status, txt);
+      return { success: false, error: `Backend error ${resp.status}${txt ? ` ${txt}` : ""}` };
+    }
+
+    const data = await resp.json().catch(() => null);
+    return { success: data?.success !== false };
+  } catch (err) {
+    console.error("handleSendCaregiverEmail request failed:", err);
+    return { success: false, error: err?.message || "Could not reach the backend." };
   }
 }
