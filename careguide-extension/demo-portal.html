@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Portal — Demo</title>
+  <style>
+    :root{
+      --blue:#2563eb; --blue-600:#1e40af; --muted:#6b7280; --bg:#f8fafc; --card:#ffffff;
+      --success:#059669; --warning:#d97706; --danger:#dc2626;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial; background:var(--bg); color:#111827}
+    .app{display:flex;min-height:100vh}
+    /* Sidebar */
+    .sidebar{width:260px;background:linear-gradient(180deg,var(--card),#f1f5f9);border-right:1px solid #e6eef8;padding:20px;box-sizing:border-box}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--blue)}
+    .logo .mark{background:var(--blue);color:white;padding:6px 8px;border-radius:6px;font-weight:700}
+    .patient{margin-top:12px;font-size:14px;color:var(--muted)}
+    .nav{margin-top:24px}
+    .nav button{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:none;background:transparent;color:#0f172a;cursor:pointer;margin-bottom:6px}
+    .nav button.active{background:rgba(37,99,235,0.08);color:var(--blue);font-weight:600}
+
+    /* Header / Main */
+    .main{flex:1;display:flex;flex-direction:column}
+    header{background:linear-gradient(90deg,var(--blue),var(--blue-600));color:white;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+    header .hdr-left{display:flex;align-items:center;gap:14px}
+    header .portal-title{font-size:18px;font-weight:700}
+    header .patient-summary{font-size:14px;opacity:0.95}
+    .content{padding:20px;flex:1;overflow:auto}
+
+    /* Cards and layout */
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{background:var(--card);padding:16px;border-radius:10px;box-shadow:0 1px 2px rgba(16,24,40,0.04);grid-column:span 4}
+    .card.big{grid-column:span 8}
+    .muted{color:var(--muted)}
+
+    /* Test results table */
+    table.results{width:100%;border-collapse:collapse}
+    table.results th, table.results td{padding:8px 10px;border-bottom:1px solid #eef2ff;text-align:left}
+    .badge{display:inline-block;padding:6px 8px;border-radius:999px;font-weight:600;font-size:13px;color:white}
+    .badge.ok{background:var(--success)}
+    .badge.warn{background:var(--warning)}
+    .badge.danger{background:var(--danger)}
+
+    /* Meds list */
+    .med{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed #eef2ff}
+    .refill{background:var(--blue);color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+
+    /* Messages */
+    .message{border-left:3px solid #e6eef8;padding:10px;background:#fbfdff;border-radius:6px;margin-bottom:12px}
+
+    /* Responsive */
+    @media (max-width:800px){
+      .app{flex-direction:column}
+      .sidebar{width:100%;display:flex;overflow:auto}
+      .nav{display:flex;gap:8px}
+      .nav button{flex:1;white-space:nowrap}
+      .card{grid-column:span 12}
+      .card.big{grid-column:span 12}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo"><div class="mark">MH</div><div><div style="font-size:15px">MyHealth Portal</div><div style="font-size:12px;color:var(--muted)">Secure Patient Access</div></div></div>
+      <div class="patient">John Smith, 68 · MRN: 11223344</div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <button role="menuitem" aria-label="Dashboard" data-section="dashboard" class="active">Dashboard</button>
+        <button role="menuitem" aria-label="Test Results" data-section="results">Test Results</button>
+        <button role="menuitem" aria-label="Medications" data-section="medications">Medications</button>
+        <button role="menuitem" aria-label="Messages" data-section="messages">Messages</button>
+        <button role="menuitem" aria-label="Appointments" data-section="appointments">Appointments</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header>
+        <div class="hdr-left">
+          <div class="portal-title">MyHealth Portal</div>
+          <div class="patient-summary">John Smith, 68 — DOB: 12/10/1957</div>
+        </div>
+        <div class="hdr-right muted">Last signed in: Jun 18, 2026</div>
+      </header>
+
+      <div class="content">
+        <!-- Dashboard -->
+        <section id="dashboard">
+          <h2>Dashboard</h2>
+          <div class="grid" style="margin-top:12px">
+            <div class="card big">
+              <h3>Upcoming Appointment</h3>
+              <p style="margin:6px 0 0">Dr. Sarah Chen — Cardiology</p>
+              <p style="margin:4px 0 0;font-weight:600">June 25, 2026 at 2:30 PM · Virtual Visit</p>
+              <div style="margin-top:8px"><button style="background:#e6f0ff;border:1px solid #cfe0ff;padding:8px 12px;border-radius:8px">Add to calendar</button></div>
+            </div>
+
+            <div class="card">
+              <h4>Messages</h4>
+              <div class="message">
+                <strong>Dr. Sarah Chen</strong><div class="muted" style="font-size:13px">Jun 19, 2026</div>
+                <p style="margin:6px 0">Your HbA1c came back at 7.2. Let's discuss medication adjustments; please schedule a follow-up.</p>
+              </div>
+              <div class="muted">You have 1 new message</div>
+            </div>
+
+            <div class="card">
+              <h4>Health Alerts</h4>
+              <ul style="margin:8px 0 0;padding-left:18px">
+                <li>HbA1c slightly high — consider glucose review</li>
+                <li>BP elevated — check at-home readings</li>
+                <li>Low potassium — medication review suggested</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Test Results -->
+        <section id="results" style="display:none">
+          <h2>Test Results</h2>
+          <div class="card big" style="margin-top:12px">
+            <h3>Lab Results (Most recent)</h3>
+            <table class="results" style="margin-top:10px">
+              <thead><tr><th>Test</th><th>Value</th><th>Reference Range</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>HbA1c</td>
+                  <td><strong>7.2%</strong></td>
+                  <td>4.0 - 5.6%</td>
+                  <td><span class="badge warn">Slightly High</span></td>
+                </tr>
+                <tr>
+                  <td>Blood Pressure (office)</td>
+                  <td><strong>138 / 88 mmHg</strong></td>
+                  <td>&lt; 130 / 80</td>
+                  <td><span class="badge warn">Elevated</span></td>
+                </tr>
+                <tr>
+                  <td>Cholesterol (Total)</td>
+                  <td><strong>195 mg/dL</strong></td>
+                  <td>&lt; 200 mg/dL</td>
+                  <td><span class="badge ok">Normal</span></td>
+                </tr>
+                <tr>
+                  <td>Potassium</td>
+                  <td><strong>3.3 mmol/L</strong></td>
+                  <td>3.5 - 5.1 mmol/L</td>
+                  <td><span class="badge danger">Low</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p class="muted" style="margin-top:10px">Note: Results are for informational purposes. Contact your clinician for medical advice.</p>
+          </div>
+        </section>
+
+        <!-- Medications -->
+        <section id="medications" style="display:none">
+          <h2>Medications</h2>
+          <div class="card big" style="margin-top:12px">
+            <div class="med">
+              <div>
+                <div style="font-weight:600">Metformin 500 mg</div>
+                <div class="muted">Take twice daily with meals</div>
+              </div>
+              <div><button class="refill">Request Refill</button></div>
+            </div>
+
+            <div class="med">
+              <div>
+                <div style="font-weight:600">Lisinopril 10 mg</div>
+                <div class="muted">Once daily — morning</div>
+              </div>
+              <div><button class="refill">Request Refill</button></div>
+            </div>
+
+            <div class="med">
+              <div>
+                <div style="font-weight:600">Atorvastatin 20 mg</div>
+                <div class="muted">At bedtime</div>
+              </div>
+              <div><button class="refill">Request Refill</button></div>
+            </div>
+
+            <p class="muted" style="margin-top:10px">Click "Request Refill" to send a refill request to your provider.</p>
+          </div>
+        </section>
+
+        <!-- Messages -->
+        <section id="messages" style="display:none">
+          <h2>Messages</h2>
+          <div class="card big" style="margin-top:12px">
+            <div class="message">
+              <strong>Dr. Sarah Chen</strong> <span class="muted" style="font-size:13px">Jun 19, 2026</span>
+              <p style="margin:6px 0">John—Your HbA1c is 7.2. I'd like to review your blood sugar logs and consider a small med adjustment. Please schedule a telehealth follow-up.</p>
+            </div>
+
+            <div class="message">
+              <strong>MyHealth Reminders</strong> <span class="muted" style="font-size:13px">Jun 7, 2026</span>
+              <p style="margin:6px 0">Annual flu shot is due — click to schedule at a nearby clinic.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Appointments -->
+        <section id="appointments" style="display:none">
+          <h2>Appointments</h2>
+          <div class="card big" style="margin-top:12px">
+            <div style="padding:12px 0;border-bottom:1px solid #f1f5f9">
+              <div style="font-weight:700">Dr. Sarah Chen</div>
+              <div class="muted">Cardiology · June 25, 2026 · 2:30 PM · Virtual Visit</div>
+            </div>
+            <div style="padding:12px 0">
+              <div style="font-weight:700">Routine Blood Draw</div>
+              <div class="muted">Completed Jun 17, 2026</div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Navigation show/hide logic
+    document.querySelectorAll('.nav button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const section = btn.dataset.section;
+        document.querySelectorAll('main .content section').forEach(s => {
+          if (s.id === section) s.style.display = '';
+          else s.style.display = 'none';
+        });
+      });
+    });
+
+    // Make links for refill buttons and messages interactive for demo
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('.refill')) {
+        alert('Refill request sent to your pharmacy.');
+      }
+    });
+
+    // Allow keyboard navigation: number keys 1-5
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement && document.activeElement.tagName==='INPUT') return;
+      const map = { '1':'dashboard','2':'results','3':'medications','4':'messages','5':'appointments' };
+      const sec = map[e.key];
+      if (sec) {
+        const btn = document.querySelector(`.nav button[data-section="${sec}"]`);
+        if (btn) btn.click();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -3,6 +3,40 @@
 
 console.log("CareGuide background worker starting");
 const BACKEND_URL = "https://your-careguide-backend.com"; // swap with your Cloud Run URL
+const ANTHROPIC_API_KEY = "<REPLACE_WITH_YOUR_ANTHROPIC_API_KEY>";
+const CLAUDE_API_ENDPOINT = "https://api.anthropic.com/v1/messages";
+
+function getAnthropicHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "x-api-key": ANTHROPIC_API_KEY,
+    "anthropic-version": "2023-06-01",
+  };
+}
+
+function isAnthropicKeyConfigured() {
+  return ANTHROPIC_API_KEY && !ANTHROPIC_API_KEY.includes("<REPLACE_WITH");
+}
+
+// ── Context Menu Setup ───────────────────────────────────────────────────────
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: "careguide-explain",
+    title: "Explain with CareGuide",
+    contexts: ["selection"]
+  });
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "careguide-explain") {
+    chrome.tabs.sendMessage(tab.id, {
+      type: "EXPLAIN_SELECTION",
+      text: info.selectionText
+    });
+  }
+});
+
+
 
 // ── Message Router ───────────────────────────────────────────────────────────
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -17,7 +51,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         })
         .catch((err) => {
           console.error("handleClaudeRequest error:", err);
-          sendResponse({ reply: "Error processing request." });
+          sendResponse({ reply: `Error processing request: ${err?.message || err}` });
         });
       return true; // keep channel open for async response
     }
@@ -57,28 +91,34 @@ Your rules:
       ? `The user selected this text on their portal: "${selectedText}"\n\nThey asked: "${userText}"`
       : userText;
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": "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",
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{ role: "user", content: userMessage }],
-      }),
-    });
+    const requestBody = {
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userMessage }],
+    };
 
-    if (!response.ok) {
-      const txt = await response.text().catch(() => "");
-      console.error("Claude API non-OK response", response.status, txt);
-      return { reply: "I'm having trouble connecting right now. Please try again in a moment." };
+    if (!isAnthropicKeyConfigured()) {
+      return { reply: "CareGuide is not configured with an Anthropic API key. Please set ANTHROPIC_API_KEY in background.js." };
     }
 
-    const data = await response.json().catch((e) => {
+    const response = await fetch(CLAUDE_API_ENDPOINT, {
+      method: "POST",
+      headers: getAnthropicHeaders(),
+      body: JSON.stringify(requestBody),
+    });
+
+    let data = null;
+    if (!response.ok) {
+      const txt = await response.text().catch(() => "");
+      console.error("Claude API non-OK response", response.status, response.statusText, txt);
+      const errorDetail = txt ? ` ${txt}` : "";
+      return {
+        reply: `Claude API error ${response.status}${errorDetail}`,
+      };
+    }
+
+    data = await response.json().catch((e) => {
       console.error("Error parsing Claude JSON:", e);
       return null;
     });
@@ -93,7 +133,7 @@ Your rules:
     return { reply };
   } catch (err) {
     console.error("Claude API error:", err);
-    return { reply: "I'm having trouble connecting right now. Please try again in a moment." };
+    return { reply: `Connection error: ${err?.message || err}` };
   }
 }
 
@@ -101,11 +141,13 @@ Your rules:
 async function handleCaregiverSummary({ pageText, portalName }) {
   try {
     console.log("handleCaregiverSummary payload: portal=", portalName, "chars=", pageText?.length || 0);
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    if (!isAnthropicKeyConfigured()) {
+      return { summary: "CareGuide is not configured with an Anthropic API key. Please set ANTHROPIC_API_KEY in background.js." };
+    }
+
+    const response = await fetch(CLAUDE_API_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json",
-        "x-api-key": "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",
-        "anthropic-version": "2023-06-01" },
+      headers: getAnthropicHeaders(),
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
         max_tokens: 1000,
@@ -121,11 +163,16 @@ Start with "Here's a summary of [patient's] portal as of today:"`,
     });
 
     if (!response.ok) {
-      console.error("Caregiver summary API error status:", response.status);
-      return { summary: "Error generating summary. Please try again." };
+      const txt = await response.text().catch(() => "");
+      console.error("Caregiver summary API error status:", response.status, response.statusText, txt);
+      const errorDetail = txt ? ` ${txt}` : "";
+      return { summary: `Caregiver API error ${response.status}${errorDetail}` };
     }
 
-    const data = await response.json().catch((e) => (console.error("Error parsing summary JSON:", e), null));
+    const data = await response.json().catch((e) => {
+      console.error("Error parsing summary JSON:", e);
+      return null;
+    });
     console.log("Caregiver API response:", data);
     const summary = data?.content?.[0]?.text || data?.completion?.[0]?.data?.text || data?.message || data?.reply || "Could not generate summary.";
     return { summary };

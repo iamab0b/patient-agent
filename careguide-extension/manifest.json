@@ -7,7 +7,8 @@
     "activeTab",
     "storage",
     "scripting",
-    "tts"
+    "tts",
+    "contextMenus"
   ],
   "host_permissions": [
     "*://*.mychart.org/*",
@@ -22,6 +23,10 @@
     "*://*.eclinicalweb.com/*",
     "*://*.portalconnect.net/*",
     "*://*.meditech.com/*",
+    "*://*.sutterhealth.org/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "file:///*",
     "https://api.anthropic.com/*"
   ],
   "background": {
@@ -41,7 +46,10 @@
         "*://*.eclinicalweb.com/*",
         "*://*.portalconnect.net/*",
         "*://*.meditech.com/*",
-        "*://*.sutterhealth.org/*"
+        "*://*.sutterhealth.org/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "file:///*"
       ],
       "js": ["content.js"],
       "css": ["sidebar.css"]
