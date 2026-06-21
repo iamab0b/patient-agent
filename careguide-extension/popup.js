@@ -2,7 +2,7 @@
 // Loads saved settings into the popup and saves them back to chrome.storage.
 
 const fields = {
-  caregiverPhone: document.getElementById("caregiver-phone"),
+  caregiverEmail: document.getElementById("caregiver-email"),
   languagePref:   document.getElementById("language-pref"),
   voiceEnabled:   document.getElementById("voice-enabled"),
   autoOpen:       document.getElementById("auto-open"),
@@ -10,9 +10,9 @@ const fields = {
 
 // Load saved settings
 chrome.storage.local.get(
-  ["caregiverPhone", "languagePref", "voiceEnabled", "autoOpen"],
+  ["caregiverEmail", "languagePref", "voiceEnabled", "autoOpen"],
   (data) => {
-    if (data.caregiverPhone) fields.caregiverPhone.value = data.caregiverPhone;
+    if (data.caregiverEmail) fields.caregiverEmail.value = data.caregiverEmail;
     if (data.languagePref)   fields.languagePref.value   = data.languagePref;
     if (data.voiceEnabled !== undefined) fields.voiceEnabled.checked = data.voiceEnabled;
     if (data.autoOpen !== undefined)     fields.autoOpen.checked     = data.autoOpen;
@@ -22,7 +22,7 @@ chrome.storage.local.get(
 // Save settings
 document.getElementById("save-btn").addEventListener("click", () => {
   chrome.storage.local.set({
-    caregiverPhone: fields.caregiverPhone.value,
+    caregiverEmail: fields.caregiverEmail.value,
     languagePref:   fields.languagePref.value,
     voiceEnabled:   fields.voiceEnabled.checked,
     autoOpen:       fields.autoOpen.checked,
