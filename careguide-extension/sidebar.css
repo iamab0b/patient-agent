@@ -191,3 +191,22 @@
   0%, 100% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.25); }
   50% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0.1); }
 }
+
+/* Minimized sidebar (small floating handle) */
+#careguide-sidebar.minimized {
+  width: 56px !important;
+  height: 56px !important;
+  top: auto !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  border-left: none !important;
+  border-radius: 12px !important;
+  padding: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+
+#careguide-sidebar.minimized > * { display: none !important; }
+
