@@ -1,0 +1,67 @@
+{
+  "manifest_version": 3,
+  "name": "CareGuide",
+  "version": "1.0.0",
+  "description": "AI-powered navigator for patient portals — plain language, voice-first, for everyone.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "tts",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "*://*.mychart.org/*",
+    "*://*.mychart.com/*",
+    "*://*.followmyhealth.com/*",
+    "*://*.healow.com/*",
+    "*://*.athenahealth.com/*",
+    "*://*.cerner.com/*",
+    "*://*.myuhcare.com/*",
+    "*://*.patient.mhealthcoach.net/*",
+    "*://*.nextgen.com/*",
+    "*://*.eclinicalweb.com/*",
+    "*://*.portalconnect.net/*",
+    "*://*.meditech.com/*",
+    "*://*.sutterhealth.org/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "file:///*",
+    "https://api.anthropic.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.mychart.org/*",
+        "*://*.mychart.com/*",
+        "*://*.followmyhealth.com/*",
+        "*://*.healow.com/*",
+        "*://*.athenahealth.com/*",
+        "*://*.cerner.com/*",
+        "*://*.myuhcare.com/*",
+        "*://*.nextgen.com/*",
+        "*://*.eclinicalweb.com/*",
+        "*://*.portalconnect.net/*",
+        "*://*.meditech.com/*",
+        "*://*.sutterhealth.org/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "file:///*"
+      ],
+      "js": ["content.js"],
+      "css": ["sidebar.css"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "128": "icons/icon128.png"
+  }
+}
