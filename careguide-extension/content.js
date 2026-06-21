@@ -522,6 +522,7 @@ function attachSidebarEvents() {
   document.getElementById("cg-language-select")?.addEventListener("change", (e) => {
     console.log("language changed to", e.target.value);
     translatePage(e.target.value);
+    applyCgUiLanguage();
   });
 
   document.querySelectorAll(".cg-action-btn").forEach((btn) => {
@@ -712,6 +713,37 @@ function getOrCreateExplanationPromise(term, context, language, portalName) {
   return cached;
 }
 
+// UI strings for the explain button/popover, localized to match the
+// selected portal language (not just the AI-generated explanation).
+const CG_UI_STRINGS = {
+  English: { explainTooltip: "Explain this", close: "Close", generating: "Generating explanation..." },
+  "Español": { explainTooltip: "Explicar esto", close: "Cerrar", generating: "Generando explicación..." },
+  "中文": { explainTooltip: "解释这个", close: "关闭", generating: "正在生成解释..." },
+  "हिन्दी": { explainTooltip: "इसे समझाएं", close: "बंद करें", generating: "स्पष्टीकरण तैयार किया जा रहा है..." },
+  "اردو": { explainTooltip: "اسے سمجھائیں", close: "بند کریں", generating: "وضاحت تیار کی جا رہی ہے..." },
+};
+
+function getCgUiString(key) {
+  const language = getSelectedLanguageLabel();
+  return CG_UI_STRINGS[language]?.[key] || CG_UI_STRINGS.English[key];
+}
+
+function applyCgUiLanguage() {
+  if (cgExplainBtn) {
+    const label = getCgUiString("explainTooltip");
+    cgExplainBtn.title = label;
+    cgExplainBtn.setAttribute("aria-label", label);
+  }
+  if (cgExplainPopover) {
+    const closeBtn = cgExplainPopover.querySelector("#cg-term-popover-close");
+    if (closeBtn) {
+      const label = getCgUiString("close");
+      closeBtn.title = label;
+      closeBtn.setAttribute("aria-label", label);
+    }
+  }
+}
+
 let cgExplainBtn = null;
 let cgExplainPopover = null;
 let cgHoverHideTimer = null;
@@ -725,7 +757,6 @@ function ensureExplainUi() {
   if (!cgExplainBtn) {
     cgExplainBtn = document.createElement("button");
     cgExplainBtn.id = "cg-term-explain-btn";
-    cgExplainBtn.title = "Explain this";
     cgExplainBtn.textContent = "?";
     document.body.appendChild(cgExplainBtn);
 
@@ -744,7 +775,7 @@ function ensureExplainUi() {
     cgExplainPopover.innerHTML = `
       <div id="cg-term-popover-header">
         <span id="cg-term-popover-title"></span>
-        <button id="cg-term-popover-close" title="Close">✕</button>
+        <button id="cg-term-popover-close">✕</button>
       </div>
       <div id="cg-term-popover-body"></div>
     `;
@@ -755,6 +786,7 @@ function ensureExplainUi() {
     });
     cgExplainPopover.addEventListener("mouseenter", () => clearHoverHideTimer());
   }
+  applyCgUiLanguage();
 }
 
 function clearHoverHideTimer() {
@@ -898,7 +930,7 @@ async function explainMedicalTerm(term, context) {
   const titleEl = cgExplainPopover.querySelector("#cg-term-popover-title");
   const bodyEl = cgExplainPopover.querySelector("#cg-term-popover-body");
   titleEl.textContent = term;
-  bodyEl.textContent = "Generating explanation...";
+  bodyEl.textContent = getCgUiString("generating");
 
   const anchorRect = cgExplainBtn.getBoundingClientRect();
   cgExplainPopover.style.top = `${anchorRect.bottom + window.scrollY + 8}px`;
