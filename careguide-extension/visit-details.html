@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Past Visit Details</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="appointments">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; <a href="appointments.html">Appointments and Visits</a> &rsaquo; Visit Details</div>
+        <h1>Office Visit</h1>
+        <p class="muted">June 15, 2026 &middot; Sarah Chen, MD &middot; Internal Medicine - Springfield</p>
+
+        <div class="tabs">
+          <button class="active" onclick="showTab(this,'avs')">After Visit Summary</button>
+          <button onclick="showTab(this,'notes')">Notes from Care Team</button>
+        </div>
+
+        <section class="tab-avs">
+          <div class="card col-12">
+            <h3>Reason for Visit</h3>
+            <p>Diabetes and blood pressure follow-up; review of recent lab work.</p>
+          </div>
+
+          <div class="card col-12" style="margin-top:14px">
+            <h3>Vitals</h3>
+            <div class="grid">
+              <div class="col-4"><span class="muted">Blood Pressure:</span> <b>138/88 mmHg</b></div>
+              <div class="col-4"><span class="muted">Pulse:</span> <b>76 bpm</b></div>
+              <div class="col-4"><span class="muted">Temperature:</span> <b>98.4 &deg;F</b></div>
+              <div class="col-4"><span class="muted">Weight:</span> <b>198 lb</b></div>
+              <div class="col-4"><span class="muted">Height:</span> <b>5' 10"</b></div>
+              <div class="col-4"><span class="muted">BMI:</span> <b>28.4</b></div>
+            </div>
+          </div>
+
+          <div class="card col-12" style="margin-top:14px">
+            <h3>Diagnoses</h3>
+            <ul>
+              <li>Type 2 diabetes mellitus — HbA1c 7.2%, slightly above goal</li>
+              <li>Essential hypertension — blood pressure mildly elevated</li>
+              <li>Hyperlipidemia — continue statin</li>
+            </ul>
+          </div>
+
+          <div class="card col-12" style="margin-top:14px">
+            <h3>Medication Changes</h3>
+            <ul>
+              <li>Continue Metformin 500 mg twice daily.</li>
+              <li>Continue Lisinopril 10 mg daily; recheck blood pressure at home.</li>
+              <li>Continue Atorvastatin 20 mg at bedtime.</li>
+            </ul>
+          </div>
+
+          <div class="card col-12" style="margin-top:14px">
+            <h3>Instructions</h3>
+            <p>Check your blood pressure at home twice a week and keep a log. Limit salt and sugary drinks.
+              A nurse will call to schedule a diabetic eye exam.</p>
+          </div>
+
+          <div class="card col-12" style="margin-top:14px">
+            <h3>Follow-up</h3>
+            <p>Return in 3 months for repeat HbA1c and lipid panel. Call sooner if you feel dizzy or have very high readings.</p>
+            <div class="btn-row"><a class="btn btn-primary" href="schedule.html">Schedule follow-up</a></div>
+          </div>
+        </section>
+
+        <section class="tab-notes" style="display:none">
+          <p class="muted">This page contains clinical notes related to this visit.</p>
+          <a class="row-item" href="visit-notes.html" style="text-decoration:none;color:inherit">
+            <div><h4>Progress Notes</h4><div class="meta">Signed Jun 15, 2026 9:17 AM &middot; Sarah Chen, MD</div></div>
+            <span class="btn btn-ghost">View</span>
+          </a>
+          <a class="row-item" href="visit-notes.html" style="text-decoration:none;color:inherit">
+            <div><h4>Care Team Note</h4><div class="meta">Signed Jun 15, 2026 8:57 AM &middot; Maria Lopez, NP</div></div>
+            <span class="btn btn-ghost">View</span>
+          </a>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="portal.js"></script>
+  <script>
+    function showTab(btn,which){
+      document.querySelectorAll('.tabs button').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      document.querySelector('.tab-avs').style.display = (which==='avs')?'':'none';
+      document.querySelector('.tab-notes').style.display = (which==='notes')?'':'none';
+    }
+  </script>
+</body>
+</html>

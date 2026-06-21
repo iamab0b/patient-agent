@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MyHealth Online — Messages</title>
+  <link rel="stylesheet" href="portal.css">
+</head>
+<body data-page="messages">
+  <div class="app">
+    <main class="main">
+      <div class="content">
+        <div class="breadcrumb"><a href="demo-portal.html">Home</a> &rsaquo; Messages</div>
+        <div class="section-title">
+          <h1>Message Center</h1>
+          <button class="btn btn-primary" data-demo-action="Demo: compose a new message to your care team.">Send a message</button>
+        </div>
+
+        <div class="message">
+          <strong>Dr. Sarah Chen</strong> <span class="badge new">New</span>
+          <div class="muted" style="font-size:13px">June 19, 2026</div>
+          <p style="margin:6px 0">John — Your HbA1c is 7.2%. I'd like to review your blood sugar logs and
+            consider a small medication adjustment. Please schedule a telehealth follow-up.</p>
+          <div class="btn-row">
+            <button class="btn" data-demo-action="Demo: reply to Dr. Chen.">Reply</button>
+            <a class="btn btn-ghost" href="schedule.html">Schedule follow-up</a>
+          </div>
+        </div>
+
+        <div class="message">
+          <strong>Dr. Sarah Chen</strong>
+          <div class="muted" style="font-size:13px">June 15, 2026</div>
+          <p style="margin:6px 0">Your lipid results are back. Cholesterol is close to goal; HDL is a little
+            low. Continue your atorvastatin and we'll recheck in 3 months.
+            <a href="test-detail.html">View result</a></p>
+          <div class="btn-row"><button class="btn" data-demo-action="Demo: reply to Dr. Chen.">Reply</button></div>
+        </div>
+
+        <div class="message">
+          <strong>MyHealth Reminders</strong>
+          <div class="muted" style="font-size:13px">June 7, 2026</div>
+          <p style="margin:6px 0">Your annual flu shot is due. <a href="schedule.html">Schedule at a nearby clinic</a>.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="portal.js"></script>
+</body>
+</html>
