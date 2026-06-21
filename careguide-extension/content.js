@@ -198,7 +198,7 @@ async function startVoice() {
     return;
   }
 
-  recognition.lang = getSelectedLanguage();
+  recognition.lang = getSelectedLanguageSpeechCode();
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
 
@@ -384,6 +384,9 @@ async function askClaude(userText) {
     console.log("askClaude background response:", response);
     if (response?.reply) {
       setResponse(response.reply);
+      try {
+        speak(response.reply);
+      } catch (e) { console.error('speak() failed after Claude reply', e); }
     } else {
       setResponse("I couldn't get a response from CareGuide. Please try again.");
     }
@@ -397,10 +400,21 @@ async function askClaude(userText) {
 // ── 7. Text-to-Speech ────────────────────────────────────────────────────────
 function speak(text) {
   try {
-    console.log("speak() called but disabled in this build", { text });
-    return;
+    if (!text) return;
+    const utter = new SpeechSynthesisUtterance(typeof text === 'string' ? text : String(text));
+    // try to match the selected language for TTS
+    try { utter.lang = getSelectedLanguageSpeechCode(); } catch (e) { /* ignore */ }
+    // default voice options
+    utter.rate = 1.0;
+    utter.pitch = 1.0;
+    if (window.speechSynthesis && typeof window.speechSynthesis.speak === 'function') {
+      window.speechSynthesis.cancel(); // stop any current speech
+      window.speechSynthesis.speak(utter);
+    } else {
+      console.log('No speechSynthesis available, fallback log:', text);
+    }
   } catch (e) {
-    console.log("TTS disabled fallback error:", e);
+    console.log("TTS error:", e);
   }
 }
 
@@ -521,6 +535,19 @@ function getSelectedLanguage() {
 function getSelectedLanguageLabel() {
   const select = document.getElementById("cg-language-select");
   return select?.options[select.selectedIndex]?.text || "English";
+}
+
+function getSelectedLanguageSpeechCode() {
+  const code = getSelectedLanguage();
+  // map select codes to speech-recognition / TTS locale codes
+  const map = {
+    en: 'en-US',
+    es: 'es-ES',
+    zh: 'zh-CN',
+    hi: 'hi-IN',
+    ur: 'ur-PK',
+  };
+  return map[code] || code || 'en-US';
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
