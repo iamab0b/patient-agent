@@ -77,7 +77,7 @@ function injectSidebar(portalName) {
     </div>
 
     <div id="cg-response-section">
-      <div id="cg-response-text">
+      <div id="cg-response-text" data-cg-default="true">
         Hi! I'm CareGuide. Tap the mic and tell me what you'd like to do,
         or select any text on the page and I'll explain it for you.
       </div>
@@ -446,21 +446,42 @@ function sendRuntimeMessage(message) {
 }
 
 // ── 8. Caregiver Summary ─────────────────────────────────────────────────────
+function getCaregiverEmail() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(["caregiverEmail"], (data) => resolve(data.caregiverEmail || null));
+  });
+}
+
 async function sendCaregiverSummary() {
   const pageText = document.body.innerText.substring(0, 3000);
+
+  const caregiverEmail = await getCaregiverEmail();
+  if (!caregiverEmail) {
+    setResponse("No caregiver email is set. Add one in the CareGuide extension settings, then try again.");
+    return;
+  }
+
   setResponse("Preparing summary for your caregiver...");
 
   try {
-    const response = await sendRuntimeMessage({
+    const summaryResponse = await sendRuntimeMessage({
       type: "CAREGIVER_SUMMARY",
       payload: { pageText, portalName: detectPortal() },
     });
 
-    if (response?.summary) {
-      setResponse(`✅ Summary ready!\n\n${response.summary}\n\nShare this with your caregiver.`);
-    } else {
+    if (!summaryResponse?.summary) {
       setResponse("Error generating caregiver summary. Please try again.");
+      return;
     }
+
+    const subject = `Portal summary for your caregiver`;
+    const mailtoUrl =
+      `mailto:${encodeURIComponent(caregiverEmail)}` +
+      `?subject=${encodeURIComponent(subject)}` +
+      `&body=${encodeURIComponent(summaryResponse.summary)}`;
+    window.open(mailtoUrl, "_blank");
+
+    setResponse(`✅ Opening an email to your caregiver at ${caregiverEmail}. Press Send in the compose window to deliver it.`);
   } catch (err) {
     console.log("sendCaregiverSummary error:", err);
     setResponse("Could not connect to the extension background service.");
@@ -521,8 +542,13 @@ function attachSidebarEvents() {
   });
   document.getElementById("cg-language-select")?.addEventListener("change", (e) => {
     console.log("language changed to", e.target.value);
-    translatePage(e.target.value);
     applyCgUiLanguage();
+    translatePage(e.target.value);
+    try {
+      chrome.storage.local.set({ languagePref: e.target.value });
+    } catch (err) {
+      console.log("Could not persist language preference:", err);
+    }
   });
 
   document.querySelectorAll(".cg-action-btn").forEach((btn) => {
@@ -582,7 +608,10 @@ function restoreSidebar() {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function setResponse(text) {
   const el = document.getElementById("cg-response-text");
-  if (el) el.textContent = text;
+  if (el) {
+    el.textContent = text;
+    el.dataset.cgDefault = "false";
+  }
 }
 
 function getSelectedLanguage() {
@@ -758,14 +787,41 @@ function getOrCreateExplanationPromise(term, context, language, portalName) {
   return cached;
 }
 
-// UI strings for the explain button/popover, localized to match the
-// selected portal language (not just the AI-generated explanation).
+// UI strings for the sidebar/explain button/popover, localized to match the
+// selected portal language (not just the AI-generated explanation). Preloaded
+// per language so switching is a single synchronous render pass — no per-word
+// network calls for any of this static chrome.
 const CG_UI_STRINGS = {
-  English: { explainTooltip: "Explain this", close: "Close", generating: "Generating explanation..." },
-  "Español": { explainTooltip: "Explicar esto", close: "Cerrar", generating: "Generando explicación..." },
-  "中文": { explainTooltip: "解释这个", close: "关闭", generating: "正在生成解释..." },
-  "हिन्दी": { explainTooltip: "इसे समझाएं", close: "बंद करें", generating: "स्पष्टीकरण तैयार किया जा रहा है..." },
-  "اردو": { explainTooltip: "اسے سمجھائیں", close: "بند کریں", generating: "وضاحت تیار کی جا رہی ہے..." },
+  English: {
+    explainTooltip: "Explain this", close: "Close", generating: "Generating explanation...",
+    voiceTapToSpeak: "Tap to speak", appointmentsBtn: "📅 Appointments", messagesBtn: "✉️ Messages",
+    caregiverBtn: "📤 Send Summary to Caregiver",
+    welcomeMessage: "Hi! I'm CareGuide. Tap the mic and tell me what you'd like to do, or select any text on the page and I'll explain it for you.",
+  },
+  "Español": {
+    explainTooltip: "Explicar esto", close: "Cerrar", generating: "Generando explicación...",
+    voiceTapToSpeak: "Toca para hablar", appointmentsBtn: "📅 Citas", messagesBtn: "✉️ Mensajes",
+    caregiverBtn: "📤 Enviar resumen al cuidador",
+    welcomeMessage: "¡Hola! Soy CareGuide. Toca el micrófono y dime qué te gustaría hacer, o selecciona cualquier texto en la página y te lo explicaré.",
+  },
+  "中文": {
+    explainTooltip: "解释这个", close: "关闭", generating: "正在生成解释...",
+    voiceTapToSpeak: "点击说话", appointmentsBtn: "📅 预约", messagesBtn: "✉️ 消息",
+    caregiverBtn: "📤 发送摘要给照护者",
+    welcomeMessage: "您好！我是 CareGuide。点击麦克风告诉我您想做什么，或选择页面上的任何文字，我会为您解释。",
+  },
+  "हिन्दी": {
+    explainTooltip: "इसे समझाएं", close: "बंद करें", generating: "स्पष्टीकरण तैयार किया जा रहा है...",
+    voiceTapToSpeak: "बोलने के लिए टैप करें", appointmentsBtn: "📅 अपॉइंटमेंट", messagesBtn: "✉️ संदेश",
+    caregiverBtn: "📤 देखभालकर्ता को सारांश भेजें",
+    welcomeMessage: "नमस्ते! मैं केयरगाइड हूं। माइक पर टैप करें और बताएं कि आप क्या करना चाहते हैं, या पेज पर कोई भी टेक्स्ट चुनें और मैं उसे समझाऊंगा।",
+  },
+  "اردو": {
+    explainTooltip: "اسے سمجھائیں", close: "بند کریں", generating: "وضاحت تیار کی جا رہی ہے...",
+    voiceTapToSpeak: "بولنے کے لیے ٹیپ کریں", appointmentsBtn: "📅 ملاقاتیں", messagesBtn: "✉️ پیغامات",
+    caregiverBtn: "📤 نگہداشت کرنے والے کو خلاصہ بھیجیں",
+    welcomeMessage: "ہیلو! میں کیئر گائیڈ ہوں۔ مائیک پر ٹیپ کریں اور بتائیں کہ آپ کیا کرنا چاہتے ہیں، یا صفحے پر کوئی بھی متن منتخب کریں اور میں اسے سمجھا دوں گا۔",
+  },
 };
 
 function getCgUiString(key) {
@@ -773,6 +829,10 @@ function getCgUiString(key) {
   return CG_UI_STRINGS[language]?.[key] || CG_UI_STRINGS.English[key];
 }
 
+// Applies every localized UI string in one synchronous pass: explain button,
+// popover, and the static sidebar chrome (voice label, action buttons,
+// caregiver button, and the welcome message if the user hasn't replaced it
+// with a real response yet).
 function applyCgUiLanguage() {
   if (cgExplainBtn) {
     const label = getCgUiString("explainTooltip");
@@ -786,6 +846,23 @@ function applyCgUiLanguage() {
       closeBtn.title = label;
       closeBtn.setAttribute("aria-label", label);
     }
+  }
+
+  const voiceLabel = document.getElementById("cg-voice-label");
+  if (voiceLabel) voiceLabel.textContent = getCgUiString("voiceTapToSpeak");
+
+  const appointmentsBtn = document.querySelector('.cg-action-btn[data-intent="appointments"]');
+  if (appointmentsBtn) appointmentsBtn.textContent = getCgUiString("appointmentsBtn");
+
+  const messagesBtn = document.querySelector('.cg-action-btn[data-intent="messages"]');
+  if (messagesBtn) messagesBtn.textContent = getCgUiString("messagesBtn");
+
+  const caregiverBtn = document.getElementById("cg-caregiver-btn");
+  if (caregiverBtn) caregiverBtn.textContent = getCgUiString("caregiverBtn");
+
+  const responseEl = document.getElementById("cg-response-text");
+  if (responseEl?.dataset.cgDefault === "true") {
+    responseEl.textContent = getCgUiString("welcomeMessage");
   }
 }
 
@@ -993,8 +1070,32 @@ async function explainMedicalTerm(term, context) {
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
+// Reads the language the user picked on a previous page (chrome.storage.local
+// is shared across all pages/tabs for this extension) so the choice persists
+// across navigation instead of resetting to English on every page load.
+async function initCareGuide() {
+  let storedLang = "en";
+  try {
+    const data = await chrome.storage.local.get(["languagePref"]);
+    if (data?.languagePref) storedLang = data.languagePref;
+  } catch (err) {
+    console.log("Could not read stored language preference:", err);
+  }
+
+  injectSidebar(detectPortal());
+
+  const select = document.getElementById("cg-language-select");
+  if (select && storedLang !== "en") {
+    select.value = storedLang;
+  }
+  applyCgUiLanguage();
+  if (storedLang !== "en") {
+    translatePage(storedLang);
+  }
+}
+
 console.log("CareGuide content script loaded on:", window.location.href);
-injectSidebar(detectPortal());
+initCareGuide();
 
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === "EXPLAIN_SELECTION") {
@@ -1030,7 +1131,59 @@ const DEMO_TRANSLATIONS = {
     "John—Your HbA1c is 7.2. I'd like to review your blood sugar logs and consider a small med adjustment. Please schedule a telehealth follow-up.": "John: Su HbA1c es 7.2. Me gustaría revisar sus registros de azúcar y considerar un pequeño ajuste de medicamento. Programe una consulta de telemedicina.",
     "Routine Blood Draw": "Análisis de sangre de rutina",
     "Completed Jun 17, 2026": "Completado el 17 de junio de 2026",
-    "Refill request sent to your pharmacy.": "Solicitud de relleno enviada a su farmacia."
+    "Refill request sent to your pharmacy.": "Solicitud de relleno enviada a su farmacia.",
+    // health-summary.html + shared header/nav
+    "MyHealth Online": "Mi Salud en Línea",
+    "Home": "Inicio",
+    "Health Summary": "Resumen de Salud",
+    "Billing": "Facturación",
+    "Care Team": "Equipo de Atención",
+    "Documents": "Documentos",
+    "Name:": "Nombre:",
+    "DOB:": "Fecha de nacimiento:",
+    "(age 68)": "(68 años)",
+    "MRN:": "Número de expediente:",
+    "PCP:": "Médico de cabecera:",
+    "› Health Summary": "› Resumen de Salud",
+    "Height:": "Altura:",
+    "Weight:": "Peso:",
+    "Blood Pressure:": "Presión Arterial:",
+    "Recorded:": "Registrado:",
+    "Last visit:": "Última visita:",
+    "Jun 15, 2026 — Office Visit": "Jun 15, 2026 — Visita en consultorio",
+    "Current Health Issues": "Problemas de Salud Actuales",
+    "View details": "Ver detalles",
+    "Type 2 diabetes mellitus": "Diabetes mellitus tipo 2",
+    "Essential hypertension": "Hipertensión esencial",
+    "Hyperlipidemia (high cholesterol)": "Hiperlipidemia (colesterol alto)",
+    "Hypokalemia (low potassium)": "Hipopotasemia (potasio bajo)",
+    "Go to Medications": "Ir a Medicamentos",
+    "Metformin 500 mg — twice daily with meals": "Metformin 500 mg — dos veces al día con las comidas",
+    "Lisinopril 10 mg — once daily in the morning": "Lisinopril 10 mg — una vez al día por la mañana",
+    "Atorvastatin 20 mg — at bedtime": "Atorvastatin 20 mg — al acostarse",
+    "Aspirin 81 mg — once daily (over the counter)": "Aspirin 81 mg — una vez al día (de venta libre)",
+    "Allergies": "Alergias",
+    "— Reaction: rash": "— Reacción: erupción cutánea",
+    "— Reaction: hives": "— Reacción: urticaria",
+    "Immunizations": "Vacunas",
+    "View all": "Ver todo",
+    "Influenza (flu) — Oct 12, 2025": "Influenza (gripe) — 12 de octubre de 2025",
+    "Shingles (Shingrix) — Apr 3, 2024": "Herpes zóster (Shingrix) — 3 de abril de 2024",
+    "Tdap (Tetanus/Diphtheria/Pertussis) — Jun 8, 2019": "Tdap (Tétanos/Difteria/Tos ferina) — 8 de junio de 2019",
+    "Pneumococcal (pneumonia) —": "Neumocócica (neumonía) —",
+    "Overdue": "Atrasado",
+    "overdue": "atrasado",
+    "Recent Test Results": "Resultados de Pruebas Recientes",
+    "Go to Test Results": "Ir a Resultados de Pruebas",
+    "Lipid Profile — Jun 15, 2026": "Perfil Lipídico — 15 de junio de 2026",
+    "Hemoglobin A1c — Jun 15, 2026": "Hemoglobina A1c — 15 de junio de 2026",
+    "Comprehensive Metabolic Panel — Jun 15, 2026": "Panel Metabólico Completo — 15 de junio de 2026",
+    "Complete Blood Count — Jun 15, 2026": "Hemograma Completo — 15 de junio de 2026",
+    "Recommended Actions (3)": "Acciones Recomendadas (3)",
+    "Flu shot — due this season": "Vacuna contra la gripe — pendiente esta temporada",
+    "Diabetic eye exam — due": "Examen ocular diabético — pendiente",
+    "Pneumonia vaccine —": "Vacuna contra la neumonía —",
+    "Schedule": "Programar"
   },
   zh: {
     "MyHealth Portal": "我的健康门户",
@@ -1057,7 +1210,59 @@ const DEMO_TRANSLATIONS = {
     "John—Your HbA1c is 7.2. I'd like to review your blood sugar logs and consider a small med adjustment. Please schedule a telehealth follow-up.": "约翰——您的HbA1c为7.2。 我想查看您的血糖记录并考虑小的药物调整。 请安排远程随访。",
     "Routine Blood Draw": "常规抽血",
     "Completed Jun 17, 2026": "已完成 2026年6月17日",
-    "Refill request sent to your pharmacy.": "续药请求已发送到您的药房。"
+    "Refill request sent to your pharmacy.": "续药请求已发送到您的药房。",
+    // health-summary.html + shared header/nav
+    "MyHealth Online": "我的健康在线",
+    "Home": "首页",
+    "Health Summary": "健康摘要",
+    "Billing": "账单",
+    "Care Team": "医疗团队",
+    "Documents": "文件",
+    "Name:": "姓名：",
+    "DOB:": "出生日期：",
+    "(age 68)": "（68岁）",
+    "MRN:": "病历号：",
+    "PCP:": "主治医生：",
+    "› Health Summary": "› 健康摘要",
+    "Height:": "身高：",
+    "Weight:": "体重：",
+    "Blood Pressure:": "血压：",
+    "Recorded:": "记录时间：",
+    "Last visit:": "上次就诊：",
+    "Jun 15, 2026 — Office Visit": "2026年6月15日 — 门诊就诊",
+    "Current Health Issues": "当前健康问题",
+    "View details": "查看详情",
+    "Type 2 diabetes mellitus": "2型糖尿病",
+    "Essential hypertension": "原发性高血压",
+    "Hyperlipidemia (high cholesterol)": "高脂血症（高胆固醇）",
+    "Hypokalemia (low potassium)": "低钾血症（钾偏低）",
+    "Go to Medications": "前往药物页面",
+    "Metformin 500 mg — twice daily with meals": "Metformin 500毫克 — 每日两次，随餐服用",
+    "Lisinopril 10 mg — once daily in the morning": "Lisinopril 10毫克 — 每日一次，早晨服用",
+    "Atorvastatin 20 mg — at bedtime": "Atorvastatin 20毫克 — 睡前服用",
+    "Aspirin 81 mg — once daily (over the counter)": "Aspirin 81毫克 — 每日一次（非处方药）",
+    "Allergies": "过敏",
+    "— Reaction: rash": "— 反应：皮疹",
+    "— Reaction: hives": "— 反应：荨麻疹",
+    "Immunizations": "免疫接种",
+    "View all": "查看全部",
+    "Influenza (flu) — Oct 12, 2025": "流感 — 2025年10月12日",
+    "Shingles (Shingrix) — Apr 3, 2024": "带状疱疹（Shingrix）— 2024年4月3日",
+    "Tdap (Tetanus/Diphtheria/Pertussis) — Jun 8, 2019": "Tdap（破伤风/白喉/百日咳）— 2019年6月8日",
+    "Pneumococcal (pneumonia) —": "肺炎球菌（肺炎）—",
+    "Overdue": "已逾期",
+    "overdue": "已逾期",
+    "Recent Test Results": "近期检测结果",
+    "Go to Test Results": "前往检测结果页面",
+    "Lipid Profile — Jun 15, 2026": "血脂检查 — 2026年6月15日",
+    "Hemoglobin A1c — Jun 15, 2026": "糖化血红蛋白A1c — 2026年6月15日",
+    "Comprehensive Metabolic Panel — Jun 15, 2026": "综合代谢检查 — 2026年6月15日",
+    "Complete Blood Count — Jun 15, 2026": "全血细胞计数 — 2026年6月15日",
+    "Recommended Actions (3)": "建议采取的措施 (3)",
+    "Flu shot — due this season": "流感疫苗 — 本季度到期",
+    "Diabetic eye exam — due": "糖尿病眼科检查 — 到期",
+    "Pneumonia vaccine —": "肺炎疫苗 —",
+    "Schedule": "安排"
   },
   ur: {
     "MyHealth Portal": "میرا ہیلتھ پورٹل",
@@ -1084,7 +1289,59 @@ const DEMO_TRANSLATIONS = {
     "John—Your HbA1c is 7.2. I'd like to review your blood sugar logs and consider a small med adjustment. Please schedule a telehealth follow-up.": "جان — آپ کا HbA1c 7.2 ہے۔ میں آپ کے بلڈ شوگر لاگز کا جائزہ لینا چاہوں گا اور ایک چھوٹا میڈ ایڈجسٹمنٹ پر غور کروں گا۔ براہ کرم ٹیل ہیلتھ فالو اپ شیڈول کریں۔",
     "Routine Blood Draw": "معمول کا خون کا ٹیسٹ",
     "Completed Jun 17, 2026": "17 جون 2026 کو مکمل ہوا",
-    "Refill request sent to your pharmacy.": "بھرتی کی درخواست آپ کی فارمیسی کو بھیج دی گئی ہے۔"
+    "Refill request sent to your pharmacy.": "بھرتی کی درخواست آپ کی فارمیسی کو بھیج دی گئی ہے۔",
+    // health-summary.html + shared header/nav
+    "MyHealth Online": "مائی ہیلتھ آن لائن",
+    "Home": "ہوم",
+    "Health Summary": "صحت کا خلاصہ",
+    "Billing": "بلنگ",
+    "Care Team": "نگہداشت ٹیم",
+    "Documents": "دستاویزات",
+    "Name:": "نام:",
+    "DOB:": "تاریخ پیدائش:",
+    "(age 68)": "(68 سال)",
+    "MRN:": "ایم آر این:",
+    "PCP:": "پی سی پی:",
+    "› Health Summary": "› صحت کا خلاصہ",
+    "Height:": "قد:",
+    "Weight:": "وزن:",
+    "Blood Pressure:": "بلڈ پریشر:",
+    "Recorded:": "ریکارڈ کیا گیا:",
+    "Last visit:": "آخری ملاقات:",
+    "Jun 15, 2026 — Office Visit": "15 جون 2026 — کلینک وزٹ",
+    "Current Health Issues": "موجودہ صحت کے مسائل",
+    "View details": "تفصیلات دیکھیں",
+    "Type 2 diabetes mellitus": "ٹائپ 2 ذیابیطس",
+    "Essential hypertension": "ایسینشل ہائی بلڈ پریشر",
+    "Hyperlipidemia (high cholesterol)": "ہائپرلیپیڈیمیا (زیادہ کولیسٹرول)",
+    "Hypokalemia (low potassium)": "ہائپوکیلیمیا (کم پوٹاشیم)",
+    "Go to Medications": "ادویات پر جائیں",
+    "Metformin 500 mg — twice daily with meals": "Metformin 500 mg — کھانے کے ساتھ روزانہ دو بار",
+    "Lisinopril 10 mg — once daily in the morning": "Lisinopril 10 mg — صبح روزانہ ایک بار",
+    "Atorvastatin 20 mg — at bedtime": "Atorvastatin 20 mg — سونے کے وقت",
+    "Aspirin 81 mg — once daily (over the counter)": "Aspirin 81 mg — روزانہ ایک بار (بغیر نسخے کے)",
+    "Allergies": "الرجی",
+    "— Reaction: rash": "— ردعمل: خارش",
+    "— Reaction: hives": "— ردعمل: چھپاکی",
+    "Immunizations": "ٹیکہ جات",
+    "View all": "سب دیکھیں",
+    "Influenza (flu) — Oct 12, 2025": "انفلوئنزا (فلو) — 12 اکتوبر 2025",
+    "Shingles (Shingrix) — Apr 3, 2024": "شنگلز (Shingrix) — 3 اپریل 2024",
+    "Tdap (Tetanus/Diphtheria/Pertussis) — Jun 8, 2019": "Tdap (تشنج/خناق/کالی کھانسی) — 8 جون 2019",
+    "Pneumococcal (pneumonia) —": "نمونیا (پنیومونیا) —",
+    "Overdue": "تاخیر سے",
+    "overdue": "تاخیر سے",
+    "Recent Test Results": "حالیہ ٹیسٹ کے نتائج",
+    "Go to Test Results": "ٹیسٹ نتائج پر جائیں",
+    "Lipid Profile — Jun 15, 2026": "لپڈ پروفائل — 15 جون 2026",
+    "Hemoglobin A1c — Jun 15, 2026": "ہیموگلوبن A1c — 15 جون 2026",
+    "Comprehensive Metabolic Panel — Jun 15, 2026": "کمپری ہینسیو میٹابولک پینل — 15 جون 2026",
+    "Complete Blood Count — Jun 15, 2026": "مکمل بلڈ کاؤنٹ — 15 جون 2026",
+    "Recommended Actions (3)": "تجویز کردہ اقدامات (3)",
+    "Flu shot — due this season": "فلو شاٹ — اس سیزن میں واجب الادا",
+    "Diabetic eye exam — due": "ذیابیطس آنکھوں کا معائنہ — واجب الادا",
+    "Pneumonia vaccine —": "نمونیا کی ویکسین —",
+    "Schedule": "شیڈول کریں"
   },
   hi: {
     "MyHealth Portal": "माईहेल्थ पोर्टल",
@@ -1111,132 +1368,171 @@ const DEMO_TRANSLATIONS = {
     "John—Your HbA1c is 7.2. I'd like to review your blood sugar logs and consider a small med adjustment. Please schedule a telehealth follow-up.": "जॉन — आपका HbA1c 7.2 है। मैं आपके रक्त शर्करा लॉग की समीक्षा करना चाहूंगा और एक छोटा दवा समायोजन पर विचार करना चाहूंगा। कृपया एक टेलीहेल्थ फॉलो-अप निर्धारित करें।",
     "Routine Blood Draw": "साधारण रक्त जांच",
     "Completed Jun 17, 2026": "17 जून 2026 को पूरा हुआ",
-    "Refill request sent to your pharmacy.": "रीफिल अनुरोध आपकी फार्मेसी को भेजा गया है।"
+    "Refill request sent to your pharmacy.": "रीफिल अनुरोध आपकी फार्मेसी को भेजा गया है।",
+    // health-summary.html + shared header/nav
+    "MyHealth Online": "माई हेल्थ ऑनलाइन",
+    "Home": "होम",
+    "Health Summary": "स्वास्थ्य सारांश",
+    "Billing": "बिलिंग",
+    "Care Team": "केयर टीम",
+    "Documents": "दस्तावेज़",
+    "Name:": "नाम:",
+    "DOB:": "जन्म तिथि:",
+    "(age 68)": "(68 वर्ष)",
+    "MRN:": "एमआरएन:",
+    "PCP:": "पीसीपी:",
+    "› Health Summary": "› स्वास्थ्य सारांश",
+    "Height:": "ऊंचाई:",
+    "Weight:": "वज़न:",
+    "Blood Pressure:": "रक्तचाप:",
+    "Recorded:": "दर्ज किया गया:",
+    "Last visit:": "पिछली विज़िट:",
+    "Jun 15, 2026 — Office Visit": "15 जून 2026 — क्लिनिक विज़िट",
+    "Current Health Issues": "वर्तमान स्वास्थ्य समस्याएं",
+    "View details": "विवरण देखें",
+    "Type 2 diabetes mellitus": "टाइप 2 मधुमेह",
+    "Essential hypertension": "एसेंशियल हाइपरटेंशन",
+    "Hyperlipidemia (high cholesterol)": "हाइपरलिपिडेमिया (उच्च कोलेस्ट्रॉल)",
+    "Hypokalemia (low potassium)": "हाइपोकैलीमिया (कम पोटैशियम)",
+    "Go to Medications": "दवाइयों पर जाएं",
+    "Metformin 500 mg — twice daily with meals": "Metformin 500 mg — भोजन के साथ दिन में दो बार",
+    "Lisinopril 10 mg — once daily in the morning": "Lisinopril 10 mg — सुबह में दिन में एक बार",
+    "Atorvastatin 20 mg — at bedtime": "Atorvastatin 20 mg — सोने के समय",
+    "Aspirin 81 mg — once daily (over the counter)": "Aspirin 81 mg — दिन में एक बार (बिना पर्ची की दवा)",
+    "Allergies": "एलर्जी",
+    "— Reaction: rash": "— प्रतिक्रिया: चकत्ते",
+    "— Reaction: hives": "— प्रतिक्रिया: पित्ती",
+    "Immunizations": "टीकाकरण",
+    "View all": "सभी देखें",
+    "Influenza (flu) — Oct 12, 2025": "इन्फ्लूएंजा (फ्लू) — 12 अक्टूबर 2025",
+    "Shingles (Shingrix) — Apr 3, 2024": "शिंगल्स (Shingrix) — 3 अप्रैल 2024",
+    "Tdap (Tetanus/Diphtheria/Pertussis) — Jun 8, 2019": "Tdap (टिटनेस/डिप्थीरिया/काली खांसी) — 8 जून 2019",
+    "Pneumococcal (pneumonia) —": "न्यूमोकोकल (निमोनिया) —",
+    "Overdue": "विलंबित",
+    "overdue": "विलंबित",
+    "Recent Test Results": "हाल के परीक्षण परिणाम",
+    "Go to Test Results": "परीक्षण परिणामों पर जाएं",
+    "Lipid Profile — Jun 15, 2026": "लिपिड प्रोफाइल — 15 जून 2026",
+    "Hemoglobin A1c — Jun 15, 2026": "हीमोग्लोबिन A1c — 15 जून 2026",
+    "Comprehensive Metabolic Panel — Jun 15, 2026": "व्यापक मेटाबॉलिक पैनल — 15 जून 2026",
+    "Complete Blood Count — Jun 15, 2026": "संपूर्ण रक्त गणना — 15 जून 2026",
+    "Recommended Actions (3)": "अनुशंसित कार्रवाइयां (3)",
+    "Flu shot — due this season": "फ्लू शॉट — इस सीज़न में देय",
+    "Diabetic eye exam — due": "डायबिटिक नेत्र परीक्षण — देय",
+    "Pneumonia vaccine —": "निमोनिया का टीका —",
+    "Schedule": "शेड्यूल करें"
   }
 };
 
+// Detects ANY page of the demo portal — not just demo-portal.html itself —
+// so the dictionary-based translation applies consistently everywhere. Using
+// the URL/hostname alone (the old check) failed for every other portal page
+// (health-summary.html, test-results.html, etc.) when opened via file://,
+// silently leaving them untranslated even with a non-English language saved.
+// portal.js stamps every page's <body data-page="..."> at render time, which
+// is a reliable content-based signal independent of how the file was opened.
 function isDemoPortalPage() {
   const href = window.location.href;
   const host = window.location.hostname;
-  return href.includes('demo-portal.html') || host === 'localhost' || host === '127.0.0.1';
+  if (host === 'localhost' || host === '127.0.0.1') return true;
+  if (href.includes('demo-portal.html')) return true;
+  return document.body?.hasAttribute('data-page') ?? false;
 }
 
+// Medication names are never machine-translated, for safety — they stay in
+// their original (English/brand) form on the page. Users get medication
+// info through the hover "?" explain feature instead, where the AI/KB
+// response is fully translated but the drug name itself is just labeled.
+const MEDICATION_NAMES = [
+  "metformin", "lisinopril", "atorvastatin", "amlodipine", "levothyroxine",
+  "metoprolol", "losartan", "omeprazole", "albuterol", "insulin", "warfarin",
+  "aspirin", "ibuprofen", "acetaminophen", "prednisone", "gabapentin",
+  "sertraline", "furosemide", "hydrochlorothiazide",
+];
+
+// Matches text nodes that are JUST a medication name (optionally with a
+// dosage/unit suffix, e.g. "Metformin 500mg") so we can leave them untouched
+// while translating everything around them. Doesn't try to protect a drug
+// name embedded inside a longer sentence — that would require word-level
+// substitution within a machine-translated string, which isn't reliable.
+function isMedicationOnlyNode(text) {
+  const trimmed = text.trim();
+  const match = trimmed.match(/^([A-Za-z]+)\b/);
+  if (!match) return false;
+  if (!MEDICATION_NAMES.includes(match[1].toLowerCase())) return false;
+  const rest = trimmed.slice(match[0].length);
+  return /^[\s\d.,()%\-–mgmcLIUtab]*$/i.test(rest);
+}
+
+function getTranslatableTextNodes() {
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode(node) {
+        const parent = node.parentElement;
+        if (!parent) return NodeFilter.FILTER_REJECT;
+        if (["SCRIPT", "STYLE", "NOSCRIPT"].includes(parent.tagName)) return NodeFilter.FILTER_REJECT;
+        if (parent.closest("#careguide-sidebar, #cg-term-popover, #cg-term-explain-btn")) return NodeFilter.FILTER_REJECT;
+        if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  return nodes;
+}
+
+// The true English source of record for every text node on the page. Always
+// translate FROM this, never from whatever's currently displayed — that's
+// what lets a direct Chinese → Spanish switch produce clean Spanish instead
+// of trying to translate Chinese into Spanish (or just leaving stale text).
+function getOriginalText(node) {
+  if (node.__cgOriginal === undefined) {
+    node.__cgOriginal = node.textContent;
+  }
+  return node.__cgOriginal;
+}
+
+function restorePageText() {
+  for (const node of getTranslatableTextNodes()) {
+    if (node.__cgOriginal !== undefined) {
+      node.textContent = node.__cgOriginal;
+    }
+  }
+}
+
+// Only translates text that has a known entry in DEMO_TRANSLATIONS — no
+// network-based machine translation of arbitrary page text. Anything not in
+// the dictionary is left in English rather than risk an inaccurate or
+// rate-limited machine translation.
 function translatePage(targetLang) {
   if (targetLang === "en") {
-    if (isDemoPortalPage()) {
-      restoreDemoPageText();
-      setResponse('Page restored to English.');
-      return;
-    }
-    location.reload(); // restore original for other portals
+    restorePageText();
+    setResponse("Page restored to English.");
     return;
   }
 
   setResponse("Translating page...");
 
-  if (isDemoPortalPage() && DEMO_TRANSLATIONS[targetLang]) {
-    translateDemoPortalPage(targetLang);
-    setResponse(`Page translated to ${getSelectedLanguageLabel()}.`);
-    return;
-  }
+  const dictionary = isDemoPortalPage() ? DEMO_TRANSLATIONS[targetLang] || {} : {};
+  const nodes = getTranslatableTextNodes();
 
-  // Fallback translation for other portals
-  const walker = document.createTreeWalker(
-    document.body,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode(node) {
-        const parent = node.parentElement;
-        if (!parent) return NodeFilter.FILTER_REJECT;
-        if (["SCRIPT", "STYLE", "NOSCRIPT"].includes(parent.tagName)) return NodeFilter.FILTER_REJECT;
-        if (parent.closest("#careguide-sidebar")) return NodeFilter.FILTER_REJECT;
-        if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
-        return NodeFilter.FILTER_ACCEPT;
-      }
+  // Capture every node's true original text up front, then resolve every
+  // node's translation before writing anything to the DOM — this is what
+  // prevents the page from ever showing a mix of old/new language text.
+  const originals = nodes.map(getOriginalText);
+  const translations = originals.map((original) => {
+    if (isMedicationOnlyNode(original)) return null; // leave medication names untouched
+    return dictionary[original.trim()] || null;
+  });
+
+  nodes.forEach((node, i) => {
+    if (translations[i]) {
+      node.textContent = originals[i].replace(originals[i].trim(), translations[i]);
     }
-  );
+  });
 
-  const nodes = [];
-  while (walker.nextNode()) nodes.push(walker.currentNode);
-
-  const BATCH_SIZE = 10;
-  (async function processBatches() {
-    for (let i = 0; i < nodes.length; i += BATCH_SIZE) {
-      const batch = nodes.slice(i, i + BATCH_SIZE);
-      await Promise.all(batch.map(node => translateNode(node, targetLang)));
-    }
-    setResponse(`Page translated to ${getSelectedLanguageLabel()}.`);
-  })();
-}
-
-function translateDemoPortalPage(targetLang) {
-  const dictionary = DEMO_TRANSLATIONS[targetLang] || {};
-  const walker = document.createTreeWalker(
-    document.body,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode(node) {
-        const parent = node.parentElement;
-        if (!parent) return NodeFilter.FILTER_REJECT;
-        if (["SCRIPT", "STYLE", "NOSCRIPT"].includes(parent.tagName)) return NodeFilter.FILTER_REJECT;
-        if (parent.closest("#careguide-sidebar")) return NodeFilter.FILTER_REJECT;
-        if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
-        return NodeFilter.FILTER_ACCEPT;
-      }
-    }
-  );
-
-  while (walker.nextNode()) {
-    const node = walker.currentNode;
-    const original = node.textContent;
-    if (!node.__cgOriginal) {
-      node.__cgOriginal = original;
-    }
-    const sourceText = node.__cgOriginal || original;
-    const trimmed = sourceText.trim();
-    const translated = dictionary[trimmed];
-    if (translated) {
-      node.textContent = sourceText.replace(trimmed, translated);
-    }
-  }
-}
-
-function restoreDemoPageText() {
-  const walker = document.createTreeWalker(
-    document.body,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode(node) {
-        const parent = node.parentElement;
-        if (!parent) return NodeFilter.FILTER_REJECT;
-        if (["SCRIPT", "STYLE", "NOSCRIPT"].includes(parent.tagName)) return NodeFilter.FILTER_REJECT;
-        if (parent.closest("#careguide-sidebar")) return NodeFilter.FILTER_REJECT;
-        if (!node.__cgOriginal) return NodeFilter.FILTER_REJECT;
-        return NodeFilter.FILTER_ACCEPT;
-      }
-    }
-  );
-
-  while (walker.nextNode()) {
-    const node = walker.currentNode;
-    node.textContent = node.__cgOriginal;
-    delete node.__cgOriginal;
-  }
-}
-
-async function translateNode(node, targetLang) {
-  const text = node.textContent.trim();
-  if (!text || text.length > 500) return; // skip very long nodes
-
-  try {
-    const res = await fetch(
-      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`
-    );
-    const data = await res.json();
-    if (data.responseStatus === 200) {
-      node.textContent = data.responseData.translatedText;
-    }
-  } catch (err) {
-    console.error("Translation error:", err);
-  }
+  setResponse(`Page translated to ${getSelectedLanguageLabel()}.`);
 }

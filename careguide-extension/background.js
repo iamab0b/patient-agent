@@ -319,3 +319,4 @@ Start with "Here's a summary of [patient's] portal as of today:",`,
     return { summary: "Error generating summary. Please try again." };
   }
 }
+
